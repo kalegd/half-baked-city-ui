@@ -1,0 +1,123 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <script type="text/javascript" src="/js/authenticate.js" defer></script>
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <div class="small-card">
+        <!--Login-->
+        <div id="login-card">
+          <a id="sign-up-btn" href="#" class="float-right color-change-button">Sign up</a>
+          <h4 class="authenticate-card-title">Login</h4>
+          <div class="card-input-group">
+            <label>Email Address</label>
+            <input id="login-email-address" name="" placeholder="Email Address">
+          </div>
+          <div class="card-input-group">
+          	<a id="forgot-password-btn" class="float-right classic-link" href="#">Forgot?</a>
+          	<label>Password</label>
+            <input id="login-password" class="form-control" placeholder="******" type="password">
+          </div>
+          <div class="card-input-group">
+            <p id="login-processing" class="processing">Attempting Login...</p>
+            <p id="login-error-verify" class="error">Please click <a id="resend-email-btn" href="#">here</a> to resend email confirmation link</p>
+            <p id="login-error" class="error">Invalid Credentials</p>
+            <input id="login-submit" type="button" value="Login">
+          </div>
+        </div>
+        <!--Sign Up-->
+        <div id="sign-up-card" class="display-none">
+          <a id="login-btn" href="#" class="float-right color-change-button">Login</a>
+          <h4 class="authenticate-card-title">Sign up</h4>
+          <div class="card-input-group">
+            <label>Username</label>
+            <input id="signup-username" name="" class="form-control" placeholder="Username">
+            <p id="signup-error-username" class="error">Username Already In Use</p>
+            <p id="signup-error-username-length" class="error">Username Must Be Between 8 and 32 Characters Long</p>
+            <p id="signup-error-username-content" class="error">Username May Only Contain Letters, Numbers, And Underscores</p>
+          </div>
+          <div class="card-input-group">
+            <label>Password</label>
+            <input id="signup-password" class="form-control" placeholder="********" type="password">
+            <p id="signup-error-password-length" class="error">Password Must Be At Least 8 Characters Long</p>
+          </div>
+          <div class="card-input-group">
+            <label>Re-enter Password</label>
+            <input id="signup-password2" class="form-control" placeholder="******" type="password">
+            <p id="signup-error-password-match" class="error">Passwords Do Not Match</p>
+          </div>
+          <div class="card-input-group">
+            <label>Email</label>
+            <input id="signup-email-address" name="" class="form-control" placeholder="Email" type="email">
+            <p id="signup-error-email" class="error">Email Already Already In Use</p>
+            <p id="signup-error-email-invalid" class="error">Invalid Email Address</p>
+          </div>
+          <div class="card-input-group">
+            <p id="signup-processing" class="processing">Attempting Registration...</p>
+            <p id="signup-success" class="success">Please check your email to confirm your account</p>
+            <p id="signup-error-server" class="error">Server error, please try again later</p>
+            <input id="signup-submit" type="button" value="Sign Up">
+          </div>
+        </div>
+        <!--Forgot Password-->
+        <div id="forgot-password-card" class="display-none">
+          <h4 class="authenticate-card-title">Forgot Password</h4>
+          <div class="card-input-group">
+            <label>Email Address</label>
+            <input id="forgot-password-email-address" name="" class="form-control" placeholder="Email Address">
+          </div>
+          <div class="card-input-group">
+            <p id="forgot-password-processing" class="processing">Please Wait...</p>
+            <p id="forgot-password-error-server" class="error">Server error, please try again later</p>
+            <p id="forgot-password-success" class="success">If Your Email Was Found In Our Records A Reset Link Will Be Emailed To You</p>
+            <input id="forgot-password-submit" type="button" value="Request Reset Link">
+          </div>
+        </div>
+        <!--Resend Email-->
+        <div id="resend-email-card" class="display-none">
+          <h4 class="authenticate-card-title">Resend Email</h4>
+          <p id="resend-email-processing" class="processing show">Please wait...</p>
+          <p id="resend-email-success" class="success">A new confirmation email has been sent</p>
+          <p id="resend-email-error" class="error">Server error, please try again later</p>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

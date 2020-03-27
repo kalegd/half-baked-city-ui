@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="css/main.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/collapsible.js" defer></script>
+    <script type="text/javascript" src="/js/account.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|<a href="/authenticate">Login</a></p>
+      <div class="medium-card">
+        <div class="account-row text-center">Hi <span id="username">...</span></div>
+        <div class="account-row flex-space-between">
+          <div>Email: <span id="email-address">...</span></div>
+          <div><a class="classic-link collapsible collapsed" href="#update-email-div"><span>Update</span><span>Close</span></a></div>
+        </div>
+        <div id="update-email-div" class="collapsible-content">
+          <div class="collapsible-content-body">
+            <div class="account-row">
+              <label>New Email Address</label>
+              <input id="new-email-address-input" placeholder="Email Address">
+            </div>
+            <p id="new-email-address-processing" class="processing">Please Wait...</p>
+            <p id="new-email-address-error-in-use" class="error">Email Already Already In Use</p>
+            <p id="new-email-address-error-invalid" class="error">Invalid Email Address</p>
+            <p id="new-email-address-error" class="error">Server error, please try again later</p>
+            <div class="account-row text-center">
+              <a id="new-email-address-submit" href="#" class="color-change-button">Update</a>
+            </div>
+          </div>
+        </div>
+        <div class="account-row d-flex justify-content-between">
+          <div>Spotify: <span id="spotify-integration">...</span></div>
+          <div><a id="spotify-connect-link" class="display-none" href="#">Connect</a></div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>
