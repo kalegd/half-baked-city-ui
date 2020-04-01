@@ -1,5 +1,6 @@
 class DataStore {
     constructor(data, pageId) {
+        this.pageId = pageId;
         this.page = data.website.pages[pageId];
         if(this.page == null) {
             return;

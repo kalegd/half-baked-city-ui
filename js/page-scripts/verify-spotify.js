@@ -19,6 +19,7 @@ if("code" in urlVars) {
         data: JSON.stringify(request),
         type: 'POST',
         contentType: 'application/json',
+        dataType: 'json',
         beforeSend: function (xhr) {
             xhr.setRequestHeader("Authorization", jwt);
         },

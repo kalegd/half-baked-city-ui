@@ -112,8 +112,7 @@ a {
     margin: auto;
     margin-bottom: 20px;
     width: 70%;
-    max-width: 480px;
-    padding: 20px;
+    max-width: 520px;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 20px;
     text-align: center;
@@ -121,8 +120,7 @@ a {
 
 .app-preview > a {
     display: block;
-    padding-top: 20px;
-    padding-bottom: 20px;
+    padding: 20px;
 }
 
 .app-title {
@@ -152,10 +150,6 @@ a {
 }
 
 .comment-button {
-    text-align: right;
-}
-
-.comment-button > a {
     margin-right: 10%;
     color: #000000;
     background-color: transparent;
@@ -165,19 +159,36 @@ a {
     transition: color .25s ease-in-out,background-color .25s ease-in-out,border-color .25s ease-in-out,box-shadow .25s ease-in-out;
 }
 
-.comment-button > a:hover {
-    /*background-color: #0069d9;
-    border-color: #0062cc;*/
+.comment-button:hover {
     background-color: #ffffff;
     border-color: #000000;
 }
 
-.comment-area {
+.comment-button.disabled {
+    cursor: wait;
+}
+
+.new-comment-box {
     resize: none;
     outline: none;
     border-radius: 10px;
     padding: 10px;
     width: 80%
+}
+
+.comments-div {
+    padding-top: 20px;
+}
+
+.comment {
+    text-align: left;
+    border-top-style: solid;
+    border-top-width: thin;
+    border-top-color: darkgrey;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    margin: auto;
+    width: 90%;
 }
 
 .small-card {
@@ -283,6 +294,10 @@ a {
     transform: scaleX(-1);
 }
 
+.text-right {
+    text-align: right;
+}
+
 .text-center {
     text-align: center;
 }
@@ -346,4 +361,10 @@ a {
 
 .processing.show, .success.show, .error.show {
     display: block;
+}
+
+.ellipsis-overflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

@@ -604,7 +604,7 @@ function saveWebsiteChanges() {
     $("#nav-save").removeClass("unsaved-changes");
     $("#nav-saving").addClass("saving");
     $.ajax({
-        url: 'https://127.0.0.1:5000/websites',
+        url: 'http://127.0.0.1:5000/websites',
         data: JSON.stringify(dataStore.websites),
         type: 'PUT',
         contentType: 'application/json',

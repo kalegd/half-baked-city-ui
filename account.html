@@ -12,8 +12,9 @@
     <title>Half Baked City</title>
     <link rel="stylesheet" href="css/main.css">
     <script type="text/javascript" src="/js/constants.js" defer></script>
-    <script type="text/javascript" src="/js/collapsible.js" defer></script>
-    <script type="text/javascript" src="/js/account.js" defer></script>
+    <script type="text/javascript" src="/js/components/collapsible.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/account.js" defer></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <script>
@@ -37,9 +38,12 @@
       </div>
     </div>
     <div class="container">
-      <p class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|<a href="/authenticate">Login</a></p>
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
       <div class="medium-card">
-        <div class="account-row text-center">Hi <span id="username">...</span></div>
+        <div class="account-row text-center">
+          Hi <span id="username">...</span>
+          <span class="float-right"><a id="sign-out" class="classic-link" href="#">Sign Out</a></span>
+        </div>
         <div class="account-row flex-space-between">
           <div>Email: <span id="email-address">...</span></div>
           <div><a class="classic-link collapsible collapsed" href="#update-email-div"><span>Update</span><span>Close</span></a></div>
@@ -61,7 +65,7 @@
         </div>
         <div class="account-row d-flex justify-content-between">
           <div>Spotify: <span id="spotify-integration">...</span></div>
-          <div><a id="spotify-connect-link" class="display-none" href="#">Connect</a></div>
+          <div><a id="spotify-connect-link" class="classic-link display-none" href="#">Connect</a></div>
         </div>
       </div>
     </div>

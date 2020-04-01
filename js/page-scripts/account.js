@@ -11,10 +11,18 @@ $("#email-address").text(user.emailAddress);
 if(user.spotify == null) {
     $("#spotify-integration").text("Not Connected");
     $("#spotify-connect-link").attr("href", "https://accounts.spotify.com/authorize?client_id=1e96d7f88e5b47f2afb4b81f0f25d846&response_type=code&redirect_uri=" + window.location.origin + "/account/verify-spotify&scope=user-library-read%20streaming%20playlist-read-private%20playlist-read-collaborative%20user-read-recently-played%20user-top-read%20user-read-private%20user-read-email%20user-read-currently-playing%20user-read-playback-state%20user-modify-playback-state");
-    $("#spotify-connect-link").removeClass("d-none");
+    $("#spotify-connect-link").removeClass("display-none");
 } else {
     $("#spotify-integration").text("Connected");
 }
+
+
+
+$("#sign-out").click(function(e) {
+    e.preventDefault();
+    localStorage.clear();
+    window.location.href = '/';
+});
 
 $("#new-email-address-submit").click(function(e) {
     e.preventDefault();
@@ -34,6 +42,7 @@ $("#new-email-address-submit").click(function(e) {
         data: JSON.stringify(request),
         type: 'PUT',
         contentType: 'application/json',
+        dataType: 'json',
         beforeSend: function (xhr) {
             xhr.setRequestHeader("Authorization", jwt);
         },

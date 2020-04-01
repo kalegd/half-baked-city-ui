@@ -69,8 +69,6 @@ class Release {
         this._user.position.x = userSettings['Initial X Position'];
         this._user.position.y = userSettings['Initial Y Position'];
         this._user.position.z = userSettings['Initial Z Position'];
-        this._movementSpeed = userSettings['Movement Speed'];
-        this._invertedPitch = userSettings['Invert Camera Y Axis Controls'];
     }
 
     _clearContainer() {
@@ -90,6 +88,7 @@ class Release {
 
     createScene() {
         this._scene = new THREE.Scene();
+        global.scene = this._scene;
     }
 
     createUser() {
@@ -270,6 +269,8 @@ class Release {
                 this._container.appendChild(this._vrButton);
             }
             this._renderer.setAnimationLoop(this._update);
+        } else {
+            $(this._loadingMessage).html("<h2>Loading " + global.loadingAssets.size + " more asset(s)</h2>");
         }
         this._stats.end();
     }

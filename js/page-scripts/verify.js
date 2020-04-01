@@ -8,11 +8,11 @@ function getUrlVars() {
 
 let urlVars = getUrlVars();
 if("token" in urlVars) {
-    let usernamePattern = /^[A-Za-z0-9_]+$/;
     $.ajax({
         url: API_URL + '/user/verify',
         type: 'POST',
         contentType: 'application/json',
+        dataType: 'json',
         beforeSend: function (xhr) {
             xhr.setRequestHeader("Authorization", urlVars['token']);
         },

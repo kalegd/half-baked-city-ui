@@ -11,7 +11,10 @@
     </script>
     <title>Half Baked City</title>
     <link rel="stylesheet" href="/css/main.css">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/app.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <script>
       (adsbygoogle = window.adsbygoogle || []).push({
@@ -19,6 +22,7 @@
         enable_page_level_ads: true
       });
     </script>
+    <meta name="id" content="70576eba-121d-4f46-b25f-c8b3a7230fa9">
   </head>
   <body>
     <div class="header">
@@ -34,7 +38,7 @@
       </div>
     </div>
     <div class="container">
-      <p class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|<a href="/authenticate">Login</a></p>
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
       <div class="medium-card text-center">
         <p class="app-title">Yang Trucks</p>
         <p>Help Andrew Yang get UBI to angry truckers</p>
@@ -42,11 +46,14 @@
         <p>
           <a href="/apps/yang-trucks/app" class="start-button">Click to Start</a>
         </p>
-        <p><img class="immersed-icon" src="/images/icons/immersed_icon.svg">: 2</p>
-        <textarea class="comment-area" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
-        <p class="comment-button">
-          <a href="#" class="comment-button">Comment</a>
+        <p><img class="immersed-icon" src="/images/icons/immersed_icon.svg">: <span id="immersions">...</span></p>
+        <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+        <p class="text-right">
+          <a href="#" id="comment-button" class="comment-button">Comment</a>
         </p>
+        <div id="comments-div" class="comments-div">
+          <p>...</p>
+        </div>
       </div>
     </div>
     <footer>
