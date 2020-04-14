@@ -1,4 +1,12 @@
-class BalloonLevel {
+import global from '/scripts/core/global.js';
+import {
+    getRandomColor,
+    createLoadingLock
+} from '/scripts/core/utils.module.js';
+
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class BalloonLevel {
     constructor(instance) {
         this._scene;
         this._popTexture;
@@ -12,18 +20,18 @@ class BalloonLevel {
             if("popGameController" in global) {
                 global.popGameController.registerBalloonLevelController(this);
             }
-            let scope = this;
-            try {
-                this._BalloonController = eval(dataStore.assets[instance['Balloon Controller']]['class']);
-                this._createMeshes();
-            } catch (e) {
-                let dependencies = [dataStore.assets[instance['Balloon Controller']].filename];
+            let dsAsset = global.dataStore.assets[instance['Balloon Controller']];
+            if(dsAsset.module == null) {
                 let lock = createLoadingLock();
-                loadScripts(dependencies, function() {
-                    scope._BalloonController = eval(dataStore.assets[instance['Balloon Controller']]['class']);
-                    scope._createMeshes();
-                    global.loadingAssets.delete(lock);
-                });
+                global.dataStore.addDependency(
+                    instance['Balloon Controller'], dsAsset).then(() => {
+                        this._BalloonController = dsAsset.module.default;
+                        this._createMeshes();
+                        global.loadingAssets.delete(lock);
+                    });
+            } else {
+                this._BalloonController = dsAsset.module.default;
+                this._createMeshes();
             }
         }
     }
@@ -31,7 +39,7 @@ class BalloonLevel {
     _createMeshes() {
         let url;
         if(this._instance['Pop Image']) {
-            url = dataStore.images[this._instance['Pop Image']].filename;
+            url = global.dataStore.images[this._instance['Pop Image']].filename;
         } else {
             url = "library/defaults/default.png";
         }
@@ -111,8 +119,12 @@ class BalloonLevel {
         return this._instance['Balloon Controller'] != "";
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.ASSET;
+        return 'ASSET';
     }
 
     static getFields() {

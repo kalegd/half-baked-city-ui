@@ -1,11 +1,14 @@
-class DartGun {
+import global from '/scripts/core/global.js';
+import { createLoadingLock } from '/scripts/core/utils.module.js';
+
+import * as THREE from '/scripts/three/build/three.module.js';
+import { GLTFLoader } from '/scripts/three/examples/jsm/loaders/GLTFLoader.js';
+import { SkeletonUtils } from '/scripts/three/examples/jsm/utils/SkeletonUtils.js';
+
+export default class DartGun {
     constructor(instance) {
         this._instance = instance;
-        if(!global.isVR) {
-            this._pivotPoint = new THREE.Object3D();
-        } else {
-            this._pivotPoint = global.renderer.xr.getController(0);
-        }
+        this._pivotPoint = new THREE.Object3D();
         this._darts = [];
         this._triggerPressed = false;
         this._scene;
@@ -20,16 +23,11 @@ class DartGun {
         this._update = this.update;
         this.update = this._preUpdate;
 
-        if(global != null && "user" in global) {//Check just for upload
-            if(global.isVR) {
-                global.user.add(this._pivotPoint);
-            } else {
-                global.camera.add(this._pivotPoint);
-                document.addEventListener('keydown', event =>
-                    { this._onKeyDown(event) }, false );
-                document.addEventListener('keyup', event =>
-                    { this._onKeyUp(event) }, false );
-            }
+        if(global.deviceType == "XR") {
+            global.inputHandler.getXRController("RIGHT", "pointer")
+                .add(this._pivotPoint);
+        } else {
+            global.camera.add(this._pivotPoint);
         }
 
         this._createMeshes(instance);
@@ -39,15 +37,15 @@ class DartGun {
         let gunFilename = "library/defaults/default.glb";
         let dartFilename = "library/defaults/default.glb";
         if(instance['Gun Model'] != "") {
-            gunFilename = dataStore.assets[instance['Gun Model']].filename;
+            gunFilename = global.dataStore.assets[instance['Gun Model']].filename;
         }
         if(instance['Dart Model'] != "") {
-            dartFilename = dataStore.assets[instance['Dart Model']].filename;
+            dartFilename = global.dataStore.assets[instance['Dart Model']].filename;
         }
         let gunScale = instance['Gun Scale'];
         let dartScale = instance['Dart Scale'];
         let scope = this;
-        const gltfLoader = new THREE.GLTFLoader();
+        const gltfLoader = new GLTFLoader();
         let lock1 = createLoadingLock();
         let lock2 = createLoadingLock();
         gltfLoader.load(gunFilename,
@@ -56,7 +54,7 @@ class DartGun {
                 scope._gunScene = gltf.scene;
                 scope._gunScene.scale.set(gunScale, gunScale, gunScale);
                 scope._pivotPoint.add(scope._gunScene);
-                if(!global.isVR) {
+                if(global.deviceType != "XR") {
                     scope._gunScene.position.setX(0.2);
                     scope._gunScene.position.setZ(-0.1);
                 }
@@ -87,7 +85,7 @@ class DartGun {
     }
 
     _createDart(instance) {
-        let dart = THREE.SkeletonUtils.clone(this._dartScene);
+        let dart = SkeletonUtils.clone(this._dartScene);
         let direction = new THREE.Vector3();
 
         this._gunScene.getWorldDirection(direction);
@@ -135,24 +133,6 @@ class DartGun {
         this._curveLine.visible = false;
     }
 
-    _onKeyDown(event){
-        event = event || window.event;
-        var keycode = event.keyCode;
-        if(keycode == 90) { //z
-            if(!this._triggerPressed) {
-                this._pressTrigger();
-            }
-        }
-    }
-
-    _onKeyUp(event){
-        event = event || window.event;
-        var keycode = event.keyCode;
-        if(keycode == 90) { //z
-            this._releaseTrigger();
-        }
-    }
-
     addToScene(scene) {
         this._scene = scene;
         this._scene.add(this._curveLine);
@@ -184,6 +164,17 @@ class DartGun {
                 "cancelable": true,
             });
         document.dispatchEvent(dartRemovedEvent)
+    }
+
+    _isTriggerInputPressed() {
+        if(global.deviceType == "XR") {
+            let controller = global.inputHandler.getXRInputSource(this._shootingHand);
+            return controller != null && controller.gamepad.buttons[0].pressed;
+        } else if(global.deviceType == "POINTER") {
+            return global.inputHandler.isKeyPressed("Space");
+        } else if(global.deviceType == "MOBILE") {
+            return global.inputHandler.isScreenTouched();
+        }
     }
 
     _updateCurve() {
@@ -228,18 +219,14 @@ class DartGun {
     }
 
     _changeHands(newHand) {
-        if(global.isVR) {
-            let oldPivotPoint = this._pivotPoint;
+        if(global.deviceType == "XR") {
             if(newHand == "RIGHT") {
-                this._pivotPoint = global.renderer.xr.getController(0);
+                global.inputHandler.getXRController("RIGHT", "pointer")
+                    .add(this._pivotPoint);
             } else if(newHand == "LEFT") {
-                this._pivotPoint = global.renderer.xr.getController(1);
+                global.inputHandler.getXRController("LEFT", "pointer")
+                    .add(this._pivotPoint);
             }
-            global.user.add(this._pivotPoint);
-            while(oldPivotPoint.children.length > 0) {
-                this._pivotPoint.add(oldPivotPoint.children[0]);
-            }
-            global.user.remove(oldPivotPoint);
         } else {
             if(newHand == "RIGHT") {
                 this._gunScene.position.setX(0.2);
@@ -257,44 +244,35 @@ class DartGun {
     }
 
     update(timeDelta) {
-        let inputSource;
-        if(global.popGameController.shootingHand == "RIGHT") {
-            inputSource = global.rightInputSource;
-            if(this._shootingHand != "RIGHT") {
-                this._changeHands("RIGHT");
+        if(global.sessionActive) {
+            if(global.popGameController.shootingHand != this._shootingHand) {
+                this._changeHands(global.popGameController.shootingHand);
             }
-        } else if(global.popGameController.shootingHand == "LEFT") {
-            inputSource = global.leftInputSource;
-            if(this._shootingHand != "LEFT") {
-                this._changeHands("LEFT");
-            }
-        }
-        if(inputSource != null) {
-            let buttons = inputSource.gamepad.buttons;
+            let triggerInputPressed = this._isTriggerInputPressed();
             if(!this._triggerPressed) {
-                if(buttons[0].pressed) {
+                if(triggerInputPressed) {
                     this._pressTrigger();
                 }
-            } else if(!buttons[0].pressed) {
+            } else if(!triggerInputPressed) {
                 this._releaseTrigger();
             }
-        }
-        if(this._triggerPressed) {
-            if(this._gettingFaster) {
-                this._nextDartSpeed = this._nextDartSpeed + (timeDelta * this._instance['Dart Oscillation Speed (m/s)']);
-                if(this._nextDartSpeed > this._instance['Dart Maximum Speed (m/s)']) {
-                    this._nextDartSpeed = this._instance['Dart Maximum Speed (m/s)'];
-                    this._gettingFaster = false;
+            if(this._triggerPressed) {
+                if(this._gettingFaster) {
+                    this._nextDartSpeed = this._nextDartSpeed + (timeDelta * this._instance['Dart Oscillation Speed (m/s)']);
+                    if(this._nextDartSpeed > this._instance['Dart Maximum Speed (m/s)']) {
+                        this._nextDartSpeed = this._instance['Dart Maximum Speed (m/s)'];
+                        this._gettingFaster = false;
+                    }
+                } else {
+                    this._nextDartSpeed = this._nextDartSpeed - (timeDelta * this._instance['Dart Oscillation Speed (m/s)']);
+                    if(this._nextDartSpeed < this._instance['Dart Minimum Speed (m/s)']) {
+                        this._nextDartSpeed = this._instance['Dart Minimum Speed (m/s)'];
+                        this._gettingFaster = true;
+                    }
                 }
-            } else {
-                this._nextDartSpeed = this._nextDartSpeed - (timeDelta * this._instance['Dart Oscillation Speed (m/s)']);
-                if(this._nextDartSpeed < this._instance['Dart Minimum Speed (m/s)']) {
-                    this._nextDartSpeed = this._instance['Dart Minimum Speed (m/s)'];
-                    this._gettingFaster = true;
+                if(!this._nextDartDisabled) {
+                    this._updateCurve();
                 }
-            }
-            if(!this._nextDartDisabled) {
-                this._updateCurve();
             }
         }
         for(let i in this._darts) {
@@ -315,8 +293,12 @@ class DartGun {
         return true;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.ASSET;
+        return 'ASSET';
     }
 
     static getFields() {
@@ -370,4 +352,3 @@ class DartGun {
     }
 
 }
-

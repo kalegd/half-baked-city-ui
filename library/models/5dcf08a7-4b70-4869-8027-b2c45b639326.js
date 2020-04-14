@@ -1,4 +1,8 @@
-class TexturePlane {
+import global from '/scripts/core/global.js';
+import { getRadians, createLoadingLock } from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class TexturePlane {
     constructor(instance) {
         this._mesh;
         this._pivotPoint = new THREE.Object3D();
@@ -19,7 +23,7 @@ class TexturePlane {
         let geometry = new THREE.PlaneBufferGeometry(this._instance['Width'], this._instance['Height']);
         let url;
         if(this._instance['Texture']) {
-            url = dataStore.images[this._instance['Texture']].filename;
+            url = global.dataStore.images[this._instance['Texture']].filename;
         } else {
             url = "library/defaults/default.png";
         }
@@ -71,6 +75,14 @@ class TexturePlane {
 
     getObject() {
         return this._pivotPoint;
+    }
+
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
+    static getScriptType() {
+        return ScriptType.ASSET;
     }
 
     static getFields() {

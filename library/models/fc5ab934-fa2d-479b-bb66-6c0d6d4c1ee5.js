@@ -1,4 +1,12 @@
-class SunsVisualization {
+import global from '/scripts/core/global.js';
+import {
+    colorHexToHex,
+    createLoadingLock,
+    fullDispose
+} from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class SunsVisualization {
     constructor(instance) {
         this._pivotPoint = new THREE.Object3D();
         this._sunGroups = new THREE.Object3D();
@@ -68,25 +76,24 @@ class SunsVisualization {
         }
         let surfaceUrl;
         if(this._instance['Sun Surface']) {
-            surfaceUrl = dataStore.images[this._instance['Sun Surface']].filename;
+            surfaceUrl = global.dataStore.images[this._instance['Sun Surface']].filename;
         } else {
             surfaceUrl = "library/defaults/default.png";
         }
-        let scope = this;
         let lock = createLoadingLock();
         new THREE.TextureLoader().load(
             surfaceUrl,
-            function(surfaceTexture) {
+            (surfaceTexture) => {
                 let atmosphereUrl;
-                if(scope._instance['Sun Atmosphere']) {
-                    atmosphereUrl = dataStore.images[scope._instance['Sun Atmosphere']].filename;
+                if(this._instance['Sun Atmosphere']) {
+                    atmosphereUrl = global.dataStore.images[this._instance['Sun Atmosphere']].filename;
                 } else {
                     atmosphereUrl = "library/defaults/default.png";
                 }
                 new THREE.TextureLoader().load(
                     atmosphereUrl,
-                    function(atmosphereTexture) {
-                        scope._uniforms = {
+                    (atmosphereTexture) => {
+                        this._uniforms = {
                             time: {
                                 //type: "f",
                                 value: 1.0
@@ -100,19 +107,19 @@ class SunsVisualization {
                                 value: surfaceTexture
                             }
                         };
-                        scope._uniforms.texture1.value.wrapS = THREE.RepeatWrapping;
-                        scope._uniforms.texture1.value.wrapT = THREE.RepeatWrapping;
-                        scope._uniforms.texture2.value.wrapS = THREE.RepeatWrapping;
-                        scope._uniforms.texture2.value.wrapT = THREE.RepeatWrapping;
+                        this._uniforms.texture1.value.wrapS = THREE.RepeatWrapping;
+                        this._uniforms.texture1.value.wrapT = THREE.RepeatWrapping;
+                        this._uniforms.texture2.value.wrapS = THREE.RepeatWrapping;
+                        this._uniforms.texture2.value.wrapT = THREE.RepeatWrapping;
                         let material = new THREE.ShaderMaterial({
-                            uniforms: scope._uniforms,
-                            vertexShader: scope._vertexShader,
-                            fragmentShader: scope._fragmentShader
+                            uniforms: this._uniforms,
+                            vertexShader: this._vertexShader,
+                            fragmentShader: this._fragmentShader
                         });
-                        let geometry = new THREE.SphereGeometry(scope._instance['Sun Size'], 64, 64);
-                        scope._sunMesh = new THREE.Mesh(geometry, material);
-                        sunGroup.add(scope._sunMesh);
-                        scope._multiplyAndAddSunGroups(sunGroup);
+                        let geometry = new THREE.SphereGeometry(this._instance['Sun Size'], 64, 64);
+                        this._sunMesh = new THREE.Mesh(geometry, material);
+                        sunGroup.add(this._sunMesh);
+                        this._multiplyAndAddSunGroups(sunGroup);
                         global.loadingAssets.delete(lock);
                     }
                 );
@@ -221,12 +228,8 @@ class SunsVisualization {
         return false;//Well, actually this can be updated, but we won't have it updated by the main class
     }
 
-    isTerrain() {
+    static isDeviceTypeSupported(deviceType) {
         return true;
-    }
-
-    getObject() {
-        return this._pivotPoint;
     }
 
     static getFields() {

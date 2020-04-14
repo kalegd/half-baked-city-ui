@@ -1,4 +1,11 @@
-class TruckGameScore {
+import global from '/scripts/core/global.js';
+import {
+    getRadians,
+    insertWrappedTextToCanvas
+} from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class TruckGameScore {
     constructor(instance) {
         this._instance = instance;
         this._pivotPoint = new THREE.Object3D();
@@ -105,8 +112,12 @@ class TruckGameScore {
         return "truckCashCollisions" in global;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.ASSET;
+        return 'ASSET';
     }
 
     static getFields() {

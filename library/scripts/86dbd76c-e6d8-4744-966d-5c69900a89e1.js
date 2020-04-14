@@ -1,83 +1,85 @@
-class MusicVisualizerController {
+import global from '/scripts/core/global.js';
+import { createLoadingLock, loadScripts } from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class MusicVisualizerController {
     constructor(instance) {
-        if(MusicVisualizerController.instance == null) {
-            this.jwt = localStorage.getItem("jwt");
-            this.user = JSON.parse(localStorage.getItem("user"));
-            this.spotifyEnabled = this.jwt != null && this.user != null && 'spotify' in this.user;
-            this.isSpotifyPremium = false;
-            this.playerActive = false;
-            this.player;
-            this.playerState = {};
-            this.currentTrackURI;
-            this.audioAnalysis;
-            this.allAudioAnalysis = {};
-            this.visualizations = [];
-            this.selectedVisualization;
-            this._apiUrl = "https://oh9m8to7dl.execute-api.us-east-1.amazonaws.com/development";
-            this._update = this.update;
-            this.update = this.preUpdate;
-            MusicVisualizerController.instance = this;
-        }
-        if(instance != null) {
-            MusicVisualizerController.instance._sampleMusicId = instance['Sample Music'];
-            if(MusicVisualizerController.instance.spotifyEnabled) {
-                let lock = createLoadingLock();
-                $.ajax({
-                    url: MusicVisualizerController.instance._apiUrl + '/user/spotify',
-                    type: 'PUT',
-                    contentType: 'application/json',
-                    dataType: 'json',
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader("Authorization", MusicVisualizerController.instance.jwt);
-                    },
-                    success: function(response) {
-                        localStorage.setItem('user', JSON.stringify(response.data.user));
-                        MusicVisualizerController.instance.spotifyToken = response.data.user.spotify.access_token;
-                        MusicVisualizerController.instance._verifySpotifyPremium();
+        this.jwt = localStorage.getItem("jwt");
+        this.user = JSON.parse(localStorage.getItem("user"));
+        this.spotifyEnabled = this.jwt != null && this.user != null && 'spotify' in this.user;
+        this.rateLimitReached = false;
+        this.isSpotifyPremium = false;
+        this.playerActive = false;
+        this.player;
+        this.playerState = {};
+        this.currentTrackURI;
+        this.audioAnalysis;
+        this.allAudioAnalysis = {};
+        this.visualizations = [];
+        this.selectedVisualization;
+        this._apiUrl = "https://oh9m8to7dl.execute-api.us-east-1.amazonaws.com/development";
+        this._update = this.update;
+        this.update = this.preUpdate;
+        this._sampleMusicId = instance['Sample Music'];
+        if(this.spotifyEnabled) {
+            let lock = createLoadingLock();
+            $.ajax({
+                url: this._apiUrl + '/user/spotify',
+                type: 'PUT',
+                contentType: 'application/json',
+                dataType: 'json',
+                beforeSend: (xhr) => {
+                    xhr.setRequestHeader("Authorization", this.jwt);
+                },
+                success: (response) => {
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
+                    this.spotifyToken = response.data.user.spotify.access_token;
+                    this._verifySpotifyPremium();
+                    global.loadingAssets.delete(lock);
+                },
+                error: (xhr, status, error) => {
+                    let response = xhr.responseJSON;
+                    console.log(response);
+                    if(xhr.status == 429) {
+                        this.rateLimitReached = true;
+                        this._setupSample();
                         global.loadingAssets.delete(lock);
-                    },
-                    error: function(xhr, status, error) {
-                        let response = xhr.responseJSON;
-                        console.log(response);
-                        //Should probably display to the user that there's an issue
-                        //and they can't use the visualizer at this time lol
                     }
-                });
-            } else {
-                MusicVisualizerController.instance._setupSample();
-            }
+                    //Should probably display to the user that there's an issue
+                    //and they can't use the visualizer at this time lol
+                }
+            });
+        } else {
+            this._setupSample();
         }
-        return MusicVisualizerController.instance;
+        global.musicVisualizerController = this;
     }
 
     _setupSample() {
         this._sound = new THREE.Audio(global.audioListener);
-        let filename = dataStore.audios[this._sampleMusicId].filename;
+        let filename = global.dataStore.audios[this._sampleMusicId].filename;
         let audioLoader = new THREE.AudioLoader();
         let lock = createLoadingLock();
-        let scope = this;
-        audioLoader.load(filename,
-            function( buffer ) {
-                scope._sound.setBuffer(buffer);
-                //scope._sound.setVolume(0.2);
-                scope.playerState.duration = buffer.duration;
-                scope.playerState.paused = true;
-                scope.getAudioPosition = scope.getAudioPositionFromSample;
-                scope.playerActive = true;
-                global.loadingAssets.delete(lock);
-            }
-        );
+        audioLoader.load(filename, (buffer) => {
+            this._sound.setBuffer(buffer);
+            //this._sound.setVolume(0.2);
+            this.playerState.duration = buffer.duration;
+            this.playerState.paused = true;
+            this.getAudioPosition = this.getAudioPositionFromSample;
+            this.playerActive = true;
+            global.loadingAssets.delete(lock);
+        });
         let lock2 = createLoadingLock();
         $.ajax({
             url: 'https://gaurav-d-kale-public.s3.amazonaws.com/C-U-Again-spotify-data.json',
             type: 'GET',
             contentType: 'application/json',
             dataType: 'json',
-            success: function(response) {
-                scope.audioAnalysis = new AudioAnalysis(response);
+            success: (response) => {
+                this.audioAnalysis = new AudioAnalysis(response);
                 global.loadingAssets.delete(lock2);
             },
-            error: function(xhr, status, error) {
+            error: (xhr, status, error) => {
                 let response = xhr.responseJSON;
                 console.log(response);
                 //Should probably display to the user that there's an issue
@@ -88,27 +90,30 @@ class MusicVisualizerController {
 
     _verifySpotifyPremium() {
         let lock = createLoadingLock();
-        let scope = this;
         $.ajax({
             url: 'https://api.spotify.com/v1/me',
             type: 'GET',
             contentType: 'application/json',
             dataType: 'json',
-            beforeSend: function (xhr) {
-                xhr.setRequestHeader("Authorization", "Bearer " + scope.spotifyToken);
+            beforeSend: (xhr) => {
+                xhr.setRequestHeader("Authorization", "Bearer " + this.spotifyToken);
             },
-            success: function(response) {
+            success: (response) => {
                 if(response.product == "premium") {
-                    scope.isSpotifyPremium = true;
-                    scope._setupSpotifyWebPlayer();
+                    this.isSpotifyPremium = true;
+                    this._setupSpotifyWebPlayer();
                 } else {
-                    scope._setupSample();
+                    this._setupSample();
                 }
                 global.loadingAssets.delete(lock);
             },
-            error: function(xhr, status, error) {
+            error: (xhr, status, error) => {
                 let response = xhr.responseJSON;
                 console.log(response);
+                if(xhr.status == 429) {
+                    this.rateLimitReached = true;
+                    this._setupSample();
+                }
                 //Should probably display to the user that there's an issue
                 //and they can't use the visualizer at this time lol
             }
@@ -117,22 +122,21 @@ class MusicVisualizerController {
 
     _setupSpotifyWebPlayer() {
         let lock = createLoadingLock();
-        let scope = this;
         window.onSpotifyWebPlaybackSDKReady = () => {
             const token = '[My Spotify Web API access token]';
-            scope.player = new Spotify.Player({
+            this.player = new Spotify.Player({
                 name: 'Web Playback SDK Quick Start Player',
-                getOAuthToken: cb => { cb(scope.spotifyToken); }
+                getOAuthToken: (cb) => { cb(this.spotifyToken); }
             });
       
             // Error handling
-            scope.player.addListener('initialization_error', ({ message }) => { console.error(message); });
-            scope.player.addListener('authentication_error', ({ message }) => { console.error(message); });
-            scope.player.addListener('account_error', ({ message }) => { console.error(message); });
-            scope.player.addListener('playback_error', ({ message }) => { console.error(message); });
+            this.player.addListener('initialization_error', ({ message }) => { console.error(message); });
+            this.player.addListener('authentication_error', ({ message }) => { console.error(message); });
+            this.player.addListener('account_error', ({ message }) => { console.error(message); });
+            this.player.addListener('playback_error', ({ message }) => { console.error(message); });
       
             // Playback status updates
-            scope.player.addListener('player_state_changed', state => {
+            this.player.addListener('player_state_changed', state => {
                 if(state != null) {
                     this.playerState.paused = state.paused;
                     this.playerState.position = state.position / 1000;
@@ -146,37 +150,42 @@ class MusicVisualizerController {
             });
       
             // Ready
-            scope.player.addListener('ready', ({ device_id }) => {
-                scope._deviceId = device_id;
+            this.player.addListener('ready', ({ device_id }) => {
+                this._deviceId = device_id;
                 console.log('Ready with Device ID', device_id);
                 $.ajax({
                     url: 'https://api.spotify.com/v1/me/player',
                     data: JSON.stringify({ "device_ids": [device_id] }),
                     type: "PUT",
                     contentType: 'application/json',
-                    beforeSend: function (xhr) {
-                        xhr.setRequestHeader("Authorization", "Bearer " + scope.spotifyToken);
+                    beforeSend: (xhr) => {
+                        xhr.setRequestHeader("Authorization", "Bearer " + this.spotifyToken);
                     },
-                    success: function(response) {
-                        MusicVisualizerController.instance.playerActive = true;
+                    success: (response) => {
+                        this.playerActive = true;
                     },
-                    error: function(xhr, status, error) {
+                    error: (xhr, status, error) => {
                         let response = xhr.responseJSON;
                         console.log(response);
+                        if(xhr.status == 429) {
+                            this.rateLimitReached = true;
+                            this.player.disconnect();
+                            this._setupSample();
+                        }
                     },
                 });
              });
 
             // Not Ready
-            scope.player.addListener('not_ready', ({ device_id }) => {
+            this.player.addListener('not_ready', ({ device_id }) => {
                 console.log('Device ID has gone offline', device_id);
-                MusicVisualizerController.instance.playerActive = true;
+                this.playerActive = false;
             });
       
             // Connect to the player!
-            scope.player.connect();
+            this.player.connect();
         };
-        loadScripts(["https://sdk.scdn.co/spotify-player.js"], function() {
+        loadScripts(["https://sdk.scdn.co/spotify-player.js"], () => {
             global.loadingAssets.delete(lock);
         });
     }
@@ -200,25 +209,28 @@ class MusicVisualizerController {
             return;
         }
         this.audioAnalysis = null;
-        let scope = this;
         $.ajax({
             url: 'https://api.spotify.com/v1/audio-analysis/' + trackId,
             type: "GET",
-            beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + scope.spotifyToken);
+            beforeSend: (xhr) => {
+                    xhr.setRequestHeader("Authorization", "Bearer " + this.spotifyToken);
             },
-            success: function(response) {
+            success: (response) => {
                 let audioAnalysis = new AudioAnalysis(response);
-                scope.allAudioAnalysis[trackId] = audioAnalysis;
-                if(scope.currentTrackURI.endsWith(trackId)) {
-                    scope.audioAnalysis = audioAnalysis;
+                this.allAudioAnalysis[trackId] = audioAnalysis;
+                if(this.currentTrackURI.endsWith(trackId)) {
+                    this.audioAnalysis = audioAnalysis;
                 }
             },
-            error: function(xhr, status, error) {
+            error: (xhr, status, error) => {
                 let response = xhr.responseJSON;
-                if(!(trackId in scope.allAudioAnalysis)) {
-                    setTimeout(function () {
-                        scope.getAudioAnalysis(trackId);
+                if(xhr.status == 429) {
+                    this.rateLimitReached = true;
+                    this.player.disconnect();
+                    this._setupSample();
+                } else if(!(trackId in this.allAudioAnalysis)) {
+                    setTimeout(() => {
+                        this.getAudioAnalysis(trackId);
                     }, 1000);
                 }
             },
@@ -234,7 +246,6 @@ class MusicVisualizerController {
     }
 
     playTrack(trackURI, playlistURI) {
-        let scope = this;
         let body = {
             "context_uri": playlistURI,
             "offset": {"uri": trackURI}
@@ -244,56 +255,61 @@ class MusicVisualizerController {
             data: JSON.stringify(body),
             type: "PUT",
             contentType: 'application/json',
-            beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + scope.spotifyToken);
+            beforeSend: (xhr) => {
+                    xhr.setRequestHeader("Authorization", "Bearer " + this.spotifyToken);
             },
-            success: function(response) {
-                scope.currentTrackURI = trackURI;
+            success: (response) => {
+                this.currentTrackURI = trackURI;
             },
-            error: function(xhr, status, error) {
+            error: (xhr, status, error) => {
                 let response = xhr.responseJSON;
                 console.error(response);
+                if(xhr.status == 429) {
+                    this.rateLimitReached = true;
+                    this.player.disconnect();
+                    this._setupSample();
+                }
             },
         });
         this.getAudioAnalysis(trackURI.substring(trackURI.lastIndexOf(":") + 1));
     }
 
     pauseTrack() {
-        let scope = this;
-        $.ajax({ 
-            url: 'https://api.spotify.com/v1/me/player/pause',
-            type: "PUT", 
-            contentType: 'application/json',
-            beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + scope.spotifyToken);  
-            },
-            success: function(response) {
-                console.log(response);
-            },
-            error: function(xhr, status, error) {
-                let response = xhr.responseJSON;
-                console.error(response);
-            },
-        });
+        this.player.pause();
+        //$.ajax({ 
+        //    url: 'https://api.spotify.com/v1/me/player/pause',
+        //    type: "PUT", 
+        //    contentType: 'application/json',
+        //    beforeSend: (xhr) => {
+        //            xhr.setRequestHeader("Authorization", "Bearer " + this.spotifyToken);  
+        //    },
+        //    success: (response) => {
+        //        console.log(response);
+        //    },
+        //    error: (xhr, status, error) => {
+        //        let response = xhr.responseJSON;
+        //        console.error(response);
+        //    },
+        //});
     }
 
     resumeTrack() {
-        let scope = this;
-        $.ajax({ 
-            url: 'https://api.spotify.com/v1/me/player/play',
-            type: "PUT", 
-            contentType: 'application/json',
-            beforeSend: function (xhr) {
-                    xhr.setRequestHeader("Authorization", "Bearer " + scope.spotifyToken);  
-            },
-            success: function(response) {
-                console.log(response);
-            },
-            error: function(xhr, status, error) {
-                let response = xhr.responseJSON;
-                console.error(response);
-            },
-        });
+        this.player.resume();
+        //$.ajax({ 
+        //    url: 'https://api.spotify.com/v1/me/player/play',
+        //    type: "PUT", 
+        //    contentType: 'application/json',
+        //    beforeSend: (xhr) => {
+        //            xhr.setRequestHeader("Authorization", "Bearer " + this.spotifyToken);  
+        //    },
+        //    success: (response) => {
+        //        console.log(response);
+        //    },
+        //    error: (xhr, status, error) => {
+        //        let response = xhr.responseJSON;
+        //        console.error(response);
+        //    },
+        //});
     }
 
     registerVisualization(visualization, name) {
@@ -337,8 +353,12 @@ class MusicVisualizerController {
         return true;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.POST_SCRIPT;
+        return 'POST_SCRIPT';
     }
 
     static getFields() {
@@ -351,9 +371,6 @@ class MusicVisualizerController {
         ];
     }
 }
-
-global.musicVisualizerController = new MusicVisualizerController();
-
 
 
 //////////////////////////

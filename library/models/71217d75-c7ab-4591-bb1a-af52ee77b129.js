@@ -1,4 +1,9 @@
-class TruckSpawner {
+import global from '/scripts/core/global.js';
+import { getRandomFloat } from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+import { GLTFLoader } from '/scripts/three/examples/jsm/loaders/GLTFLoader.js';
+
+export default class TruckSpawner {
     constructor(instance) {
         this._scene;
         this._gltfScene;
@@ -12,16 +17,17 @@ class TruckSpawner {
 
         this._TruckController;
         if(instance['Truck Controller'] != "") {
-            let scope = this;
-            try {
-                this._TruckController = eval(dataStore.assets[instance['Truck Controller']]['class']);
+            let dsAsset = global.dataStore.assets[instance['Truck Controller']];
+            if(dsAsset.module == null) {
+                global.dataStore.addDependency(
+                    instance['Truck Controller'], dsAsset).then(() => {
+                        this._TruckController = dsAsset.module.default;
+                        this._createMeshes();
+                    });
+            } else {
+                this._TruckController = dsAsset.module.default;
+                console.log(this._TruckController);
                 this._createMeshes();
-            } catch (e) {
-                let dependencies = [dataStore.assets[instance['Truck Controller']].filename];
-                loadScripts(dependencies, function() {
-                    scope._TruckController = eval(dataStore.assets[instance['Truck Controller']]['class']);
-                    scope._createMeshes();
-                });
             }
         }
     }
@@ -29,10 +35,10 @@ class TruckSpawner {
     _createMeshes() {
         let filename = "library/defaults/default.glb";
         if(this._instance['Truck Model'] != "") {
-            filename = dataStore.assets[this._instance['Truck Model']].filename;
+            filename = global.dataStore.assets[this._instance['Truck Model']].filename;
         }
         let scope = this;
-        const gltfLoader = new THREE.GLTFLoader();
+        const gltfLoader = new GLTFLoader();
         gltfLoader.load(filename,
             function (gltf) {
                 scope._gltfScene = gltf.scene;
@@ -121,6 +127,10 @@ class TruckSpawner {
 
     canUpdate() {
         return this._instance['Truck Controller'] != "";
+    }
+
+    static isDeviceTypeSupported(deviceType) {
+        return true;
     }
 
     static getScriptType() {

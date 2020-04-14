@@ -1,4 +1,10 @@
-class TruckController {
+import global from '/scripts/core/global.js';
+import { getRadians } from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+import { GLTFLoader } from '/scripts/three/examples/jsm/loaders/GLTFLoader.js';
+import { SkeletonUtils } from '/scripts/three/examples/jsm/utils/SkeletonUtils.js';
+
+export default class TruckController {
     constructor(instance) {
         this._gltfScene;
         this._goalWindow;
@@ -33,10 +39,10 @@ class TruckController {
     _createMeshes() {
         let filename = "library/defaults/default.glb";
         if(this._assetId != "") {
-            filename = dataStore.assets[this._assetId].filename;
+            filename = global.dataStore.assets[this._assetId].filename;
         }
         let scope = this;
-        const gltfLoader = new THREE.GLTFLoader();
+        const gltfLoader = new GLTFLoader();
         gltfLoader.load(filename,
             function (gltf) {
                 scope._gltfScene = gltf.scene;
@@ -62,7 +68,7 @@ class TruckController {
                 if(scope._audioId != "") {
                     scope._sound = new THREE.PositionalAudio(global.audioListener);
                     scope._pivotPoint.add(scope._sound);
-                    filename = dataStore.audios[scope._audioId].filename;
+                    filename = global.dataStore.audios[scope._audioId].filename;
                     let audioLoader = new THREE.AudioLoader();
                     audioLoader.load(filename,
                         function( buffer ) {
@@ -90,7 +96,7 @@ class TruckController {
         this._pivotPoint.translateZ(instance['Initial Z Position']);
         this._pivotPoint.rotateY(getRadians(instance['Initial Y Rotation']));
         this._pivotPoint.scale.set(this._scale, this._scale, this._scale);
-        this._pivotPoint.add(THREE.SkeletonUtils.clone(model));
+        this._pivotPoint.add(SkeletonUtils.clone(model));
         let geometry = new THREE.PlaneBufferGeometry( 1.25, 1.3 );
         let material = new THREE.MeshBasicMaterial({
             color: 0xff0000,
@@ -112,7 +118,7 @@ class TruckController {
         if(this._audioId != "") {
             this._sound = new THREE.PositionalAudio(global.audioListener);
             this._pivotPoint.add(this._sound);
-            let filename = dataStore.audios[this._audioId].filename;
+            let filename = global.dataStore.audios[this._audioId].filename;
             let audioLoader = new THREE.AudioLoader();
             let scope = this;
             audioLoader.load(filename,
@@ -154,8 +160,12 @@ class TruckController {
         return this._speed != 0;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.ASSET;
+        return 'ASSET';
     }
 
     static getFields() {

@@ -1,4 +1,13 @@
-class Balloon {
+import global from '/scripts/core/global.js';
+import {
+    colorHexToHex,
+    createLoadingLock,
+    fullDispose
+} from '/scripts/core/utils.module.js';
+
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class Balloon {
     constructor(instance) {
         this._balloonMesh;
         this._popImage;
@@ -40,7 +49,7 @@ class Balloon {
 
         let url;
         if(instance['Pop Image']) {
-            url = dataStore.images[instance['Pop Image']].filename;
+            url = global.dataStore.images[instance['Pop Image']].filename;
         } else {
             url = "library/defaults/default.png";
         }
@@ -108,7 +117,7 @@ class Balloon {
         if(this._audioId != "") {
             this._sound = new THREE.PositionalAudio(global.audioListener);
             this._pivotPoint.add(this._sound);
-            let filename = dataStore.audios[this._audioId].filename;
+            let filename = global.dataStore.audios[this._audioId].filename;
             let audioLoader = new THREE.AudioLoader();
             let scope = this;
             audioLoader.load(filename,
@@ -156,8 +165,12 @@ class Balloon {
         return false;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.ASSET;
+        return 'ASSET';
     }
 
     static getFields() {

@@ -1,29 +1,27 @@
-class TruckCashCollisions {
+import global from '/scripts/core/global.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class TruckCashCollisions {
     constructor(instance) {
-        if(TruckCashCollisions.instance == null) {
-            this._truckAssets = [];
-            this._cashObjects = [];
-            this._sound = null;
-            this.trucksHit = 0;
-            this.bulletsUsed = 0;
-            this.gameState = "INTRO";
-            document.addEventListener('bulletFired', event =>
-                    { this._bulletFired(event) }, false );
-            document.addEventListener('bulletRemoved', event =>
-                    { this._bulletRemoved(event) }, false );
-            TruckCashCollisions.instance = this;
-        }
-        if(instance != null && instance['Game Over Audio'] != "") {
-            TruckCashCollisions.instance._sound = new THREE.Audio(global.audioListener);
-            let filename = dataStore.audios[instance['Game Over Audio']].filename;
+        this._truckAssets = [];
+        this._cashObjects = [];
+        this._sound = null;
+        this.trucksHit = 0;
+        this.bulletsUsed = 0;
+        this.gameState = "INTRO";
+        document.addEventListener('bulletFired', event =>
+                { this._bulletFired(event) }, false );
+        document.addEventListener('bulletRemoved', event =>
+                { this._bulletRemoved(event) }, false );
+        if(instance['Game Over Audio'] != "") {
+            this._sound = new THREE.Audio(global.audioListener);
+            let filename = global.dataStore.audios[instance['Game Over Audio']].filename;
             let audioLoader = new THREE.AudioLoader();
-            audioLoader.load(filename,
-                function( buffer ) {
-                    TruckCashCollisions.instance._sound.setBuffer(buffer);
-                }
-            );
+            audioLoader.load(filename, (buffer) => {
+                this._sound.setBuffer(buffer);
+            });
         }
-        return TruckCashCollisions.instance;
+        global.truckCashCollisions = this;
     }
 
     _bulletFired(event) {
@@ -90,8 +88,12 @@ class TruckCashCollisions {
         return true;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.POST_SCRIPT;
+        return 'POST_SCRIPT';
     }
 
     static getFields() {
@@ -104,5 +106,3 @@ class TruckCashCollisions {
         ];
     }
 }
-
-global.truckCashCollisions = new TruckCashCollisions();

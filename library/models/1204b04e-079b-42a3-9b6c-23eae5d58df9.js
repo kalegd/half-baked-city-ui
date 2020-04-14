@@ -1,11 +1,14 @@
-class BulletBlaster {
+import global from '/scripts/core/global.js';
+import { createLoadingLock } from '/scripts/core/utils.module.js';
+
+import * as THREE from '/scripts/three/build/three.module.js';
+import { GLTFLoader } from '/scripts/three/examples/jsm/loaders/GLTFLoader.js';
+import { SkeletonUtils } from '/scripts/three/examples/jsm/utils/SkeletonUtils.js';
+
+export default class BulletBlaster {
     constructor(instance) {
         this._instance = instance;
-        if(!global.isVR) {
-            this._pivotPoint = new THREE.Object3D();
-        } else {
-            this._pivotPoint = global.renderer.vr.getController(0);
-        }
+        this._pivotPoint = new THREE.Object3D();
         this._bullets = [];
         this._triggerPressed = false;
         this._timeSinceLastBullet = 0;
@@ -15,16 +18,11 @@ class BulletBlaster {
         this._update = this.update;
         this.update = this._preUpdate;
 
-        if(global != null && "user" in global) {//Check just for upload
-            if(global.isVR) {
-                global.user.add(this._pivotPoint);
-            } else {
-                global.camera.add(this._pivotPoint);
-                document.addEventListener('keydown', event =>
-                    { this._onKeyDown(event) }, false );
-                document.addEventListener('keyup', event =>
-                    { this._onKeyUp(event) }, false );
-            }
+        if(global.deviceType == "XR") {
+            global.inputHandler.getXRController("RIGHT", "pointer")
+                .add(this._pivotPoint);
+        } else {
+            global.camera.add(this._pivotPoint);
         }
 
         this._createMeshes(instance);
@@ -34,15 +32,15 @@ class BulletBlaster {
         let blasterFilename = "library/defaults/default.glb";
         let bulletFilename = "library/defaults/default.glb";
         if(instance['Blaster Model'] != "") {
-            blasterFilename = dataStore.assets[instance['Blaster Model']].filename;
+            blasterFilename = global.dataStore.assets[instance['Blaster Model']].filename;
         }
         if(instance['Bullet Model'] != "") {
-            bulletFilename = dataStore.assets[instance['Bullet Model']].filename;
+            bulletFilename = global.dataStore.assets[instance['Bullet Model']].filename;
         }
         let blasterScale = instance['Blaster Scale'];
         let bulletScale = instance['Bullet Scale'];
         let scope = this;
-        const gltfLoader = new THREE.GLTFLoader();
+        const gltfLoader = new GLTFLoader();
         let lock1 = createLoadingLock();
         let lock2 = createLoadingLock();
         gltfLoader.load(blasterFilename,
@@ -51,7 +49,7 @@ class BulletBlaster {
                 scope._blasterScene = gltf.scene;
                 scope._blasterScene.scale.set(blasterScale, blasterScale, blasterScale);
                 scope._pivotPoint.add(scope._blasterScene);
-                if(!global.isVR) {
+                if(global.deviceType != "XR") {
                     scope._blasterScene.position.setX(0.2);
                 }
                 global.loadingAssets.delete(lock1);
@@ -68,7 +66,7 @@ class BulletBlaster {
     }
 
     _createBullet(instance) {
-        let bullet = THREE.SkeletonUtils.clone(this._bulletScene);
+        let bullet = SkeletonUtils.clone(this._bulletScene);
         let direction = new THREE.Vector3();
 
         this._blasterScene.getWorldDirection(direction);
@@ -108,24 +106,6 @@ class BulletBlaster {
         this._triggerPressed = false;
     }
 
-    _onKeyDown(event){
-        event = event || window.event;
-        var keycode = event.keyCode;
-        if(keycode == 90) { //z
-            if(!this._triggerPressed) {
-                this._pressTrigger();
-            }
-        }
-    }
-
-    _onKeyUp(event){
-        event = event || window.event;
-        var keycode = event.keyCode;
-        if(keycode == 90) { //z
-            this._releaseTrigger();
-        }
-    }
-
     addToScene(scene) {
         this._scene = scene;
     }
@@ -158,6 +138,17 @@ class BulletBlaster {
         document.dispatchEvent(bulletRemovedEvent)
     }
 
+    _isTriggerInputPressed() {
+        if(global.deviceType == "XR") {
+            let controller = global.inputHandler.getXRInputSource("RIGHT");
+            return controller != null && controller.gamepad.buttons[0].pressed;
+        } else if(global.deviceType == "POINTER") {
+            return global.inputHandler.isKeyPressed("Space");
+        } else if(global.deviceType == "MOBILE") {
+            return global.inputHandler.isScreenTouched();
+        }
+    }
+
     _preUpdate(timeDelta) {
         if(this._blasterScene != null && this._bulletScene != null) {
             this.update = this._update;
@@ -166,19 +157,19 @@ class BulletBlaster {
 
     update(timeDelta) {
         this._timeSinceLastBullet += timeDelta;
-        if(global.rightInputSource != null) {
-            let buttons = global.rightInputSource.gamepad.buttons;
+        if(global.sessionActive) {
+            let triggerInputPressed = this._isTriggerInputPressed();
             if(!this._triggerPressed) {
-                if(buttons[0].pressed) {
+                if(triggerInputPressed) {
                     this._pressTrigger();
                 }
-            } else if(!buttons[0].pressed) {
+            } else if(!triggerInputPressed) {
                 this._releaseTrigger();
             }
-        }
-        if(this._instance['Auto Fire'] && this._triggerPressed) {
-            if(this._timeSinceLastBullet > (1 / this._instance['Auto Fire Rate (bullets/second)'])) {
-                this._pressTrigger();
+            if(this._instance['Auto Fire'] && this._triggerPressed) {
+                if(this._timeSinceLastBullet > (1 / this._instance['Auto Fire Rate (bullets/second)'])) {
+                    this._pressTrigger();
+                }
             }
         }
         let distance = this._instance['Bullet Speed (m/s)'] * timeDelta;
@@ -197,8 +188,12 @@ class BulletBlaster {
         return true;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.ASSET;
+        return 'ASSET';
     }
 
     static getFields() {
@@ -247,4 +242,3 @@ class BulletBlaster {
     }
 
 }
-

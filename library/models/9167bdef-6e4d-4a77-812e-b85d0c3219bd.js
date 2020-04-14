@@ -1,4 +1,8 @@
-class HopalongAttractorVisualization {
+import global from '/scripts/core/global.js';
+import { createLoadingLock, fullDispose } from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class HopalongAttractorVisualization {
     constructor(instance) {
         this._pivotPoint = new THREE.Object3D();
         this._instance = instance;
@@ -46,16 +50,15 @@ class HopalongAttractorVisualization {
     _createMeshes() {
         let url;
         if(this._instance['Sprite']) {
-            url = dataStore.images[this._instance['Sprite']].filename;
+            url = global.dataStore.images[this._instance['Sprite']].filename;
         } else {
             url = "library/defaults/default.png";
         }
-        let scope = this;
         let lock = createLoadingLock();
         new THREE.TextureLoader().load(
             url,
-            function(texture) {
-                scope._createMeshes2(lock, texture);
+            (texture) => {
+                this._createMeshes2(lock, texture);
             }
         );
     }
@@ -265,12 +268,12 @@ class HopalongAttractorVisualization {
         return false;//Well, actually this can be updated, but we won't have it updated by the main class
     }
 
-    isTerrain() {
+    static isDeviceTypeSupported(deviceType) {
         return true;
     }
 
-    getObject() {
-        return this._pivotPoint;
+    static getScriptType() {
+        return 'ASSET';
     }
 
     static getFields() {

@@ -56,6 +56,15 @@ canvas {
     padding-bottom: 10px;
 }
 
-#start.removed, #start.loading, #loading {
+#start.removed, #start.loading, #loading, #mobile-start-button.removed {
     display: none;
+}
+
+#mobile-start-button {
+    margin-top: 50px;
+    padding: 12px;
+    display: inline-block;
+    font-size: 4vw;
+    border-style: solid;
+    border-radius: 10px;
 }

@@ -1,4 +1,8 @@
-class GalacticLightsVisualization {
+import global from '/scripts/core/global.js';
+import { createLoadingLock, fullDispose } from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class GalacticLightsVisualization {
     constructor(instance) {
         this._pivotPoint = new THREE.Object3D();
         this._instance = instance;
@@ -30,32 +34,31 @@ class GalacticLightsVisualization {
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
         let url;
         if(this._instance['Sprite']) {
-            url = dataStore.images[this._instance['Sprite']].filename;
+            url = global.dataStore.images[this._instance['Sprite']].filename;
         } else {
             url = "library/defaults/default.png";
         }
-        let scope = this;
         let lock = createLoadingLock();
         new THREE.TextureLoader().load(
             url,
-            function(texture) {
-                for(let i = 0; i < scope._instance['Groups']; i++) {
-                    scope._materials[i] = new THREE.PointsMaterial({
-                        size: scope._instance['Sprite Size'],
+            (texture) => {
+                for(let i = 0; i < this._instance['Groups']; i++) {
+                    this._materials[i] = new THREE.PointsMaterial({
+                        size: this._instance['Sprite Size'],
                         map: texture,
                         blending: THREE.AdditiveBlending,
                         depthTest: false,
                         transparent: true
                     });
-                    scope._hues[i] = Math.random();
-                    scope._lightnesses[i] = 0.5;
-                    scope._materials[i].color.setHSL(
-                        scope._hues[i], 1, scope._lightnesses[i]);
-                    let lights = new THREE.Points(geometry, scope._materials[i]);
+                    this._hues[i] = Math.random();
+                    this._lightnesses[i] = 0.5;
+                    this._materials[i].color.setHSL(
+                        this._hues[i], 1, this._lightnesses[i]);
+                    let lights = new THREE.Points(geometry, this._materials[i]);
                     lights.rotation.x = Math.random() * 6;
 					lights.rotation.y = Math.random() * 6;
 					lights.rotation.z = Math.random() * 6;
-                    scope._pivotPoint.add(lights);
+                    this._pivotPoint.add(lights);
                 }
                 global.loadingAssets.delete(lock);
             }
@@ -125,12 +128,12 @@ class GalacticLightsVisualization {
         return false;//Well, actually this can be updated, but we won't have it updated by the main class
     }
 
-    isTerrain() {
+    static isDeviceTypeSupported(deviceType) {
         return true;
     }
 
-    getObject() {
-        return this._pivotPoint;
+    static getScriptType() {
+        return 'ASSET';
     }
 
     static getFields() {

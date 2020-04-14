@@ -1,49 +1,46 @@
-class PopGameController {
+import global from '/scripts/core/global.js';
+import { createLoadingLock } from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class PopGameController {
     constructor(instance) {
-        if(PopGameController.instance == null) {
-            this._balloonAssets = [];
-            this._dartObjects = [];
-            this._balloonHitRadius = null;
-            this._balloonLevelController = null;
-            this.dartsDisabled = false;
-            this.levelSelected = 0;
-            this.balloonsPopped = 0;
-            this.dartsUsed = 0;
-            this.goal = 0;
-            this._sound = null;
-            this.gameState = "SETTINGS";
-            this.mode = "NORMAL";
-            this.movementJoystickHand = "LEFT";
-            this.shootingHand = "RIGHT";
-            this.musicPlaying = true;
-            document.addEventListener('dartFired', event =>
-                    { this._dartFired(event) }, false );
-            document.addEventListener('dartRemoved', event =>
-                    { this._dartRemoved(event) }, false );
-            this._initializeLevelData();
-            PopGameController.instance = this;
-        }
-        if(instance != null) {
-            PopGameController.instance._balloonHitRadius = instance['Balloon Hit Radius'];
-            PopGameController.instance._soundVolume = instance['Default Volume'];
-        }
-        if(instance != null && instance['Background Music'] != "") {
-            PopGameController.instance._sound = new THREE.Audio(global.audioListener);
-            let filename = dataStore.audios[instance['Background Music']].filename;
+        this._balloonAssets = [];
+        this._dartObjects = [];
+        this._balloonHitRadius = null;
+        this._balloonLevelController = null;
+        this.dartsDisabled = false;
+        this.levelSelected = 0;
+        this.balloonsPopped = 0;
+        this.dartsUsed = 0;
+        this.goal = 0;
+        this._sound = null;
+        this.gameState = "SETTINGS";
+        this.mode = "NORMAL";
+        this.movementJoystickHand = "LEFT";
+        this.shootingHand = "RIGHT";
+        this.musicPlaying = true;
+        document.addEventListener('dartFired', event =>
+                { this._dartFired(event) }, false );
+        document.addEventListener('dartRemoved', event =>
+                { this._dartRemoved(event) }, false );
+        this._initializeLevelData();
+        this._balloonHitRadius = instance['Balloon Hit Radius'];
+        this._soundVolume = instance['Default Volume'];
+        if(instance['Background Music'] != "") {
+            this._sound = new THREE.Audio(global.audioListener);
+            let filename = global.dataStore.audios[instance['Background Music']].filename;
             let audioLoader = new THREE.AudioLoader();
             let lock = createLoadingLock();
-            audioLoader.load(filename,
-                function( buffer ) {
-                    PopGameController.instance._sound.setBuffer(buffer);
-                    PopGameController.instance._sound.autoplay = true;
-                    PopGameController.instance._sound.setLoop(true);
-                    PopGameController.instance._sound.setVolume(PopGameController.instance._soundVolume);
-                    PopGameController.instance._sound.play();
-                    global.loadingAssets.delete(lock);
-                }
-            );
+            audioLoader.load(filename, (buffer) => {
+                this._sound.setBuffer(buffer);
+                this._sound.autoplay = true;
+                this._sound.setLoop(true);
+                this._sound.setVolume(this._soundVolume);
+                this._sound.play();
+                global.loadingAssets.delete(lock);
+            });
         }
-        return PopGameController.instance;
+        global.popGameController = this;
     }
 
     _dartFired(event) {
@@ -103,21 +100,12 @@ class PopGameController {
         }
     }
 
-    endGame() {
-        //if(this._sound != null) {
-        //    this._sound.play();
-        //}
-        //this.gameState = "FAILED";
-        //this._balloonAssets = [];
-        //this._dartObjects = [];
-    }
-
     registerBalloonLevelController(controller) {
         this._balloonLevelController = controller;
     }
 
     changeMovementHand(newHand) {
-        global.basicControls.movementJoystickHand = newHand;
+        global.basicMovement.setMovementHand(newHand);
         this.movementJoystickHand = newHand;
     }
 
@@ -531,8 +519,12 @@ class PopGameController {
         }
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.POST_SCRIPT;
+        return 'POST_SCRIPT';
     }
 
     static getFields() {
@@ -555,5 +547,3 @@ class PopGameController {
         ];
     }
 }
-
-global.popGameController = new PopGameController();

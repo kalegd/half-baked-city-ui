@@ -1,20 +1,23 @@
-class MusicVisualizerMenu {
+import global from '/scripts/core/global.js';
+import {
+    getRadians,
+    insertWrappedTextToCanvas
+} from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class MusicVisualizerMenu {
     constructor(instance) {
         this._instance = instance;
         this._pivotPoint = new THREE.Object3D();
-        if(global.isVR) {
-            this._pointerPoint = global.renderer.xr.getController(0);
+        this._pointerPoint = new THREE.Object3D();
+        if(global.deviceType == "XR") {
+            global.inputHandler.getXRController("RIGHT", "pointer")
+                .add(this._pointerPoint);
         } else {
-            this._pointerPoint = new THREE.Object3D();
             this._pointerPoint.position.setX(0.2);
             global.camera.add(this._pointerPoint);
-            document.addEventListener('keydown', event =>
-                { this._onKeyDown(event) }, false );
-            document.addEventListener('keyup', event =>
-                { this._onKeyUp(event) }, false );
         }
         this._lineMesh;
-        this._scene;
         this._canvas = document.createElement("canvas");
         this._activeHand = "RIGHT";
         this._texture;
@@ -31,6 +34,7 @@ class MusicVisualizerMenu {
         this._selectedPlaylistTrack;
         this._visuals = global.musicVisualizerController.visualizations;
         this._visualsPage = 0;
+        this._rateLimitReached = false;
         this._samplePlaying = false;
         this._playerActive = false;
         this._menuLock = true;
@@ -56,7 +60,6 @@ class MusicVisualizerMenu {
         if(global.musicVisualizerController.spotifyEnabled) {
             this._state = "PLAYLISTS";
             this._writePlaylistsMenu();
-            //this._getPlaylists();
         } else {
             this._menuLock = false;
             this._state = "SAMPLE";
@@ -92,7 +95,9 @@ class MusicVisualizerMenu {
         context.fillStyle = "#55FF55";
         context.font = '30px Arial';
         let text;
-        if(global.musicVisualizerController.jwt == null) {
+        if(this._rateLimitReached) {
+            text = "Looks like too many people love this app and we've exceeded Spotify's limit. Message Spotify or tweet #spotify to let them know we all want #halfbakedcity limits raised";
+        } else if(global.musicVisualizerController.jwt == null) {
             text = "Log In and Connect your Spotify Premium Account to play music from your playlists";
         } else if(global.musicVisualizerController.spotifyEnabled) {
             text = "Upgrade to Spotify Premium to play music from your playlists";
@@ -100,7 +105,6 @@ class MusicVisualizerMenu {
             text = "Connect your Spotify Premium Account to play music from your playlists";
         }
         insertWrappedTextToCanvas(context, text, this._canvas.width / 2, this._canvas.height * 0.25, this._canvas.width * 0.9, 40);
-        //context.fillText(text, this._canvas.width / 2, this._canvas.height * 0.25);
         context.fillText("Sample", this._canvas.width / 2, this._canvas.height * 0.1);
         if(!this._samplePlaying) {
             context.fillText("Play Sample", this._canvas.width / 2, this._canvas.height * 0.8);
@@ -210,20 +214,19 @@ class MusicVisualizerMenu {
     }
 
     _getPlaylists() {
-        let scope = this;
         $.ajax({
-            url: 'https://api.spotify.com/v1/me/playlists?limit=50&offset=' + scope._playlistsOffset,
+            url: 'https://api.spotify.com/v1/me/playlists?limit=50&offset=' + this._playlistsOffset,
             type: "GET",
-            beforeSend: function (xhr) {
+            beforeSend: (xhr) => {
                     xhr.setRequestHeader("Authorization", "Bearer " + global.musicVisualizerController.spotifyToken);
             },
-            success: function(response) {
-                scope._playlists = response.items;
-                scope._totalPlaylists = response.total;
-                scope._menuLock = false;
-                scope._writePlaylistsMenu();
+            success: (response) => {
+                this._playlists = response.items;
+                this._totalPlaylists = response.total;
+                this._menuLock = false;
+                this._writePlaylistsMenu();
             },
-            error: function(xhr, status, error) {
+            error: (xhr, status, error) => {
                 let response = xhr.responseJSON;
                 console.log(response);
             },
@@ -231,21 +234,20 @@ class MusicVisualizerMenu {
     }
 
     _getPlaylistTracks() {
-        let scope = this;
         $.ajax({
-            url: 'https://api.spotify.com/v1/playlists/' + scope._selectedPlaylist.id + '/tracks?limit=100&offset=' + scope._playlistTracksOffset,
+            url: 'https://api.spotify.com/v1/playlists/' + this._selectedPlaylist.id + '/tracks?limit=100&offset=' + this._playlistTracksOffset,
             type: "GET",
-            beforeSend: function (xhr) {
+            beforeSend: (xhr) => {
                     xhr.setRequestHeader("Authorization", "Bearer " + global.musicVisualizerController.spotifyToken);
             },
-            success: function(response) {
+            success: (response) => {
                 //console.log(response);
-                scope._playlistTracks = response.items;
-                scope._totalPlaylistTracks = response.total;
-                scope._menuLock = false;
-                scope._writePlaylistTracksMenu();
+                this._playlistTracks = response.items;
+                this._totalPlaylistTracks = response.total;
+                this._menuLock = false;
+                this._writePlaylistTracksMenu();
             },
-            error: function(xhr, status, error) {
+            error: (xhr, status, error) => {
                 let response = xhr.responseJSON;
                 console.log(response);
             },
@@ -302,7 +304,6 @@ class MusicVisualizerMenu {
                         index = this._playlistsPage * 5 + index - this._playlistsOffset;
                         if(index < this._playlists.length) {
                             this._selectedPlaylist = this._playlists[index];
-                            //console.log(this._selectedPlaylist);
                             this._playlistTracksOffset = 0;
                             this._playlistTracksPage = 0;
                             this._menuLock = true;
@@ -345,7 +346,6 @@ class MusicVisualizerMenu {
                         index = this._playlistTracksPage * 5 + index - this._playlistTracksOffset;
                         if(index < this._playlistTracks.length) {
                             this._selectedPlaylistTrack = this._playlistTracks[index];
-                            //console.log(this._selectedPlaylistTrack);
                             global.musicVisualizerController.playTrack(this._selectedPlaylistTrack.track.uri, this._selectedPlaylist.uri);
                         }
                     }
@@ -361,7 +361,6 @@ class MusicVisualizerMenu {
                 }
             } else if(this._state == "VISUALS") {
                 if(height * -0.425 < point.y && point.y < height * 0.325) {
-                    //TODO: Populate options and select them
                     if(this._visualsPage != Math.floor(Math.abs((this._totalPlaylists - 1) / 5)) && width * 0.42 < point.x && point.x < width * 0.48) {
                         this._visualsPage++;
                         this._writeVisualsMenu();
@@ -373,7 +372,6 @@ class MusicVisualizerMenu {
                         index = this._visualsPage * 5 + index;
                         if(index < this._visuals.length) {
                             global.musicVisualizerController.selectVisualization(index);
-                            //console.log(this._visuals[index]);
                         }
                     }
                 } else if(height * 0.35 < point.y && point.y < height * 0.45) {
@@ -393,41 +391,10 @@ class MusicVisualizerMenu {
     _pressTriggerOffMenu(intersection) {
         this._triggerPressed = true;
         this._pivotPoint.visible = !this._pivotPoint.visible;
-        //if(this._pivotPoint.parent == null) {
-        //    this._scene.add(this._pivotPoint);
-        //} else {
-        //    this._scene.remove(this._pivotPoint);
-        //}
     }
 
     _releaseTrigger() {
         this._triggerPressed = false;
-    }
-
-    _onKeyDown(event) {
-        event = event || window.event;
-        var keycode = event.keyCode;
-        if(keycode == 90) { //z
-            if(!this._triggerPressed) {
-                let intersection = null;
-                if(this._pivotPoint.visible) {
-                    intersection = this._getIntersection();
-                }
-                if(intersection != null) {
-                    this._pressTriggerOnMenu(intersection);
-                } else {
-                    this._pressTriggerOffMenu();
-                }
-            }
-        }
-    }
-
-    _onKeyUp(event) {
-        event = event || window.event;
-        var keycode = event.keyCode;
-        if(keycode == 90) { //z
-            this._releaseTrigger();
-        }
     }
 
     _getIntersection() {
@@ -456,34 +423,35 @@ class MusicVisualizerMenu {
     }
 
     _changeHands(newHand) {
-        if(global.isVR) {
-            let oldPointerPoint = this._pointerPoint;
+        if(global.deviceType == "XR") {
             if(newHand == "RIGHT") {
-                this._pointerPoint = global.renderer.xr.getController(0);
-                this._activeHand = "RIGHT";
+                global.inputHandler.getXRController("RIGHT", "pointer")
+                    .add(this._pointerPoint);
             } else if(newHand == "LEFT") {
-                this._pointerPoint = global.renderer.xr.getController(1);
-                this._activeHand = "LEFT";
+                global.inputHandler.getXRController("LEFT", "pointer")
+                    .add(this._pointerPoint);
             }
-            oldPointerPoint.parent.add(this._pointerPoint);
-            while(oldPointerPoint.children.length > 0) {
-                this._pointerPoint.add(oldPointerPoint.children[0]);
-            }
-            oldPointerPoint.parent.remove(oldPointerPoint);
         }
     }
 
     addToScene(scene) {
-        this._scene = scene;
         scene.add(this._pivotPoint);
-        if(global.isVR) {
-            global.user.add(this._pointerPoint);
-        }
     }
 
     removeFromScene() {
         this._pivotPoint.parent.remove(this._pivotPoint);
         fullDispose(this._pivotPoint);
+    }
+
+    _isTriggerInputPressed() {
+        if(global.deviceType == "XR") {
+            let controller = global.inputHandler.getXRInputSource(this._activeHand);
+            return controller != null && controller.gamepad.buttons[0].pressed;
+        } else if(global.deviceType == "POINTER") {
+            return global.inputHandler.isKeyPressed("Space");
+        } else if(global.deviceType == "MOBILE") {
+            return global.inputHandler.isScreenTouched();
+        }
     }
 
     update(timeDelta) {
@@ -500,47 +468,35 @@ class MusicVisualizerMenu {
             }
             this._playerActive = global.musicVisualizerController.playerActive;
         }
-        let intersection = null;
-        if(this._pivotPoint.visible) {
-            intersection = this._getIntersection();
-        }
-        if(intersection != null) {
-            this._updateLine(intersection);
-
-            if(!this._lineMesh.visible) {
-                this._lineMesh.visible = true;
+        if(global.sessionActive) {
+            let intersection = null;
+            if(this._pivotPoint.visible) {
+                intersection = this._getIntersection();
             }
-            if(global.rightInputSource != null) {
-                let buttons;
-                if(this._activeHand == "RIGHT") {
-                    buttons = global.rightInputSource.gamepad.buttons;
-                } else {
-                    buttons = global.leftInputSource.gamepad.buttons;
+            if(intersection != null) {
+                this._updateLine(intersection);
+
+                if(!this._lineMesh.visible) {
+                    this._lineMesh.visible = true;
                 }
+                let triggerInputPressed = this._isTriggerInputPressed();
                 if(!this._triggerPressed) {
-                    if(buttons[0].pressed) {
+                    if(triggerInputPressed) {
                         this._pressTriggerOnMenu(intersection);
                     }
-                } else if(!buttons[0].pressed) {
+                } else if(!triggerInputPressed) {
                     this._releaseTrigger();
                 }
-            }
-        } else {
-            if(this._lineMesh.visible) {
-                this._lineMesh.visible = false;
-            }
-            if(global.rightInputSource != null) {
-                let buttons;
-                if(this._activeHand == "RIGHT") {
-                    buttons = global.rightInputSource.gamepad.buttons;
-                } else {
-                    buttons = global.leftInputSource.gamepad.buttons;
+            } else {
+                if(this._lineMesh.visible) {
+                    this._lineMesh.visible = false;
                 }
+                let triggerInputPressed = this._isTriggerInputPressed();
                 if(!this._triggerPressed) {
-                    if(buttons[0].pressed) {
+                    if(triggerInputPressed) {
                         this._pressTriggerOffMenu(intersection);
                     }
-                } else if(!buttons[0].pressed) {
+                } else if(!triggerInputPressed) {
                     this._releaseTrigger();
                 }
             }
@@ -549,14 +505,23 @@ class MusicVisualizerMenu {
             this._samplePlaying = false;
             this._writeSampleMenu();
         }
+        if(global.musicVisualizerController.rateLimitReached && !this._rateLimitReached) {
+            this._rateLimitReached = true;
+            this._state = "SAMPLE";
+            this._writeSampleMenu();
+        }
     }
 
     canUpdate() {
         return "musicVisualizerController" in global;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.ASSET;
+        return 'ASSET';
     }
 
     static getFields() {

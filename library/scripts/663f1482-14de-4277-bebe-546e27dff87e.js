@@ -1,4 +1,6 @@
-class AddImmersion {
+import global from '/scripts/core/global.js';
+
+export default class AddImmersion {
     constructor(instance) {
         if(AddImmersion.instance == null) {
             this._apiUrl = "https://oh9m8to7dl.execute-api.us-east-1.amazonaws.com/development";
@@ -13,7 +15,7 @@ class AddImmersion {
 
     preUpdate(timeDelta) {
         $.ajax({
-            url: this._apiUrl + '/app/' + dataStore.pageId + "/immersion",
+            url: this._apiUrl + '/app/' + global.dataStore.pageId + "/immersion",
             type: 'POST',
             dataType: 'json',
             success: function(response) {
@@ -35,8 +37,12 @@ class AddImmersion {
         return true;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.POST_SCRIPT;
+        return 'POST_SCRIPT';
     }
 
     static getFields() {
@@ -44,5 +50,3 @@ class AddImmersion {
         ];
     }
 }
-
-global.addImmersion = new AddImmersion();

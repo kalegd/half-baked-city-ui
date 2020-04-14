@@ -1,4 +1,6 @@
 var jwt, emailAddress;
+setupButtonClickOnFieldEnter("login-submit", "login-password");
+setupButtonClickOnFieldEnter("signup-submit", "signup-email-address");
 $("#login-btn").click(function() {
     $("#sign-up-card").addClass("display-none");
     $("#login-card").removeClass("display-none");

@@ -14,3 +14,11 @@ const setImmersions = (appId, htmlId) => {
         }
     });
 }
+
+const setupButtonClickOnFieldEnter = (buttonId, fieldId) => {
+    $("#" + fieldId).keyup(function(event) {
+        if (event.originalEvent.code === "Enter") {
+            $("#" + buttonId).click();
+        }
+    });
+}

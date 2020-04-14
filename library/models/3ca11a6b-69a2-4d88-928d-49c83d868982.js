@@ -1,17 +1,21 @@
-class PopGameMenu {
+import global from '/scripts/core/global.js';
+import {
+    getRadians,
+    insertWrappedTextToCanvas
+} from '/scripts/core/utils.module.js';
+import * as THREE from '/scripts/three/build/three.module.js';
+
+export default class PopGameMenu {
     constructor(instance) {
         this._instance = instance;
         this._pivotPoint = new THREE.Object3D();
-        if(global.isVR) {
-            this._pointerPoint = global.renderer.xr.getController(0);
+        this._pointerPoint = new THREE.Object3D();
+        if(global.deviceType == "XR") {
+            global.inputHandler.getXRController("RIGHT", "pointer")
+                .add(this._pointerPoint);
         } else {
-            this._pointerPoint = new THREE.Object3D();
             this._pointerPoint.position.setX(0.2);
             global.camera.add(this._pointerPoint);
-            document.addEventListener('keydown', event =>
-                { this._onKeyDown(event) }, false );
-            document.addEventListener('keyup', event =>
-                { this._onKeyUp(event) }, false );
         }
         this._lineMesh;
         this._canvas = document.createElement("canvas");
@@ -337,24 +341,6 @@ class PopGameMenu {
         this._triggerPressed = false;
     }
 
-    _onKeyDown(event) {
-        event = event || window.event;
-        var keycode = event.keyCode;
-        if(keycode == 90) { //z
-            if(!this._triggerPressed) {
-                this._pressTrigger();
-            }
-        }
-    }
-
-    _onKeyUp(event) {
-        event = event || window.event;
-        var keycode = event.keyCode;
-        if(keycode == 90) { //z
-            this._releaseTrigger();
-        }
-    }
-
     _getIntersection() {
         let position = new THREE.Vector3();
         let direction = new THREE.Vector3();
@@ -382,18 +368,14 @@ class PopGameMenu {
     }
 
     _changeHands(newHand) {
-        if(global.isVR) {
-            let oldPointerPoint = this._pointerPoint;
+        if(global.deviceType == "XR") {
             if(newHand == "RIGHT") {
-                this._pointerPoint = global.renderer.xr.getController(0);
+                global.inputHandler.getXRController("RIGHT", "pointer")
+                    .add(this._pointerPoint);
             } else if(newHand == "LEFT") {
-                this._pointerPoint = global.renderer.xr.getController(1);
+                global.inputHandler.getXRController("LEFT", "pointer")
+                    .add(this._pointerPoint);
             }
-            oldPointerPoint.parent.add(this._pointerPoint);
-            while(oldPointerPoint.children.length > 0) {
-                this._pointerPoint.add(oldPointerPoint.children[0]);
-            }
-            oldPointerPoint.parent.remove(oldPointerPoint);
         } else {
             if(newHand == "RIGHT") {
                 this._pointerPoint.position.setX(0.2);
@@ -413,6 +395,17 @@ class PopGameMenu {
         fullDispose(this._pivotPoint);
     }
 
+    _isTriggerInputPressed() {
+        if(global.deviceType == "XR") {
+            let controller = global.inputHandler.getXRInputSource(global.popGameController.shootingHand);
+            return controller != null && controller.gamepad.buttons[0].pressed;
+        } else if(global.deviceType == "POINTER") {
+            return global.inputHandler.isKeyPressed("Space");
+        } else if(global.deviceType == "MOBILE") {
+            return global.inputHandler.isScreenTouched();
+        }
+    }
+
     update(timeDelta) {
         if(this._gameState != global.popGameController.gameState) {
             this._gameState = global.popGameController.gameState;
@@ -430,49 +423,26 @@ class PopGameMenu {
             this._updateTexture();
         }
 
-        let intersection = this._getIntersection();
-        if(intersection != null) {
-            //TODO: Display line
-            this._updateLine(intersection);
-
-            if(!global.popGameController.dartsDisabled) {
-                global.popGameController.dartsDisabled = true;
-                this._lineMesh.visible = true;
-            }
-            if(global.rightInputSource != null) {
-                let buttons;
-                if(global.popGameController.shootingHand == "RIGHT") {
-                    buttons = global.rightInputSource.gamepad.buttons;
-                } else {
-                    buttons = global.leftInputSource.gamepad.buttons;
+        if(global.sessionActive) {
+            let intersection = this._getIntersection();
+            if(intersection != null) {
+                this._updateLine(intersection);
+                if(!global.popGameController.dartsDisabled) {
+                    global.popGameController.dartsDisabled = true;
+                    this._lineMesh.visible = true;
                 }
+                let triggerInputPressed = this._isTriggerInputPressed();
                 if(!this._triggerPressed) {
-                    if(buttons[0].pressed) {
+                    if(triggerInputPressed) {
                         this._pressTrigger();
                     }
-                } else if(!buttons[0].pressed) {
+                } else if(!triggerInputPressed) {
                     this._releaseTrigger();
                 }
+            } else if(global.popGameController.dartsDisabled) {
+                global.popGameController.dartsDisabled = false;
+                this._lineMesh.visible = false;
             }
-            //for(let key in global.gamepads) {
-            //    let gamepad = global.gamepads[key];
-            //    if (gamepad.id == "Oculus Touch (Right)") {
-            //        let buttons = gamepad.buttons;
-            //        if(!this._triggerPressed) {
-            //            if(buttons[1]['pressed']) {
-            //                this._pressTrigger(intersection);
-            //                //if ("hapticActuators" in gamepad && gamepad.hapticActuators.length > 0) {
-            //                //    gamepad.hapticActuators[0].pulse(0.5, 100);
-            //                //}
-            //            }
-            //        } else if(!buttons[1]['pressed']) {
-            //            this._releaseTrigger();
-            //        }
-            //    }
-            //}
-        } else if(global.popGameController.dartsDisabled) {
-            global.popGameController.dartsDisabled = false;
-            this._lineMesh.visible = false;
         }
     }
 
@@ -480,8 +450,12 @@ class PopGameMenu {
         return "popGameController" in global;
     }
 
+    static isDeviceTypeSupported(deviceType) {
+        return true;
+    }
+
     static getScriptType() {
-        return ScriptType.ASSET;
+        return 'ASSET';
     }
 
     static getFields() {
