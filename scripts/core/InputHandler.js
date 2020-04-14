@@ -112,7 +112,6 @@ export default class InputHandler {
 
     _onKeyUp(event) {
         let code = event.code;
-        console.log(code);
         this._keysPressed.delete(code);
     }
 
