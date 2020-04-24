@@ -1,0 +1,128 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="3bd10048-af08-4e6c-97a9-459865ede218">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="app-title text-center">Getting Started With WebXR Part 1 &ndash; Creating a Scene</h2>
+          <p>This tutorial series will focus on:<p>
+          <ol>
+            <li>Creating a scene</li>
+            <li><a href="/tutorials/getting-started-with-webxr-part-2">Allowing users to immerse themselves within the scene via VR Headset</a></li>
+            <li><a href="/tutorials/getting-started-with-webxr-part-3">Allowing users to look around the scene on Desktop / Laptop</a></li>
+            <li><a href="/tutorials/getting-started-with-webxr-part-4">Allowing users to look around the scene on mobile</a></li>
+          </ol>
+          <p>By the end of this tutorial series, we'll end up with a <a target="_blank" href="https://kalegd.github.io/getting_started_with_webxr_part_4">WebXR page accessible by XR Browsers, Desktop / Laptop Browsers, and Mobile Browsers</a></p>
+          <h3>Step 1</h3>
+          <p>The first thing we'll do is download the <em>module</em> build of <em>three.js</em> from <a target="_blank" href="https://github.com/mrdoob/three.js/tree/dev/build">here</a>. This tutorial is up to date with <a target="_blank" href="https://github.com/mrdoob/three.js/tree/r115">r115</a></p>
+          <blockquote>three.js has a bunch of community supported components written as both scripts and modules, but are soon ending support for the scripts in favor of just maintaining the modules. Best to get used to using ES6 Modules now if you want to use those components, which we will in these tutorials</blockquote>
+          <p>Next, we'll create an html document called <code>index.html</code> and includes a script tag pointing to a module we'll soon write called <code>setup.js</code></p>
+          <script src="https://gist.github.com/kalegd/61e8d19c7789a6ecb7ca4765b2b1ffd2.js"></script>
+          <blockquote>ES6 Fact: Only modules can import other modules</blockquote>
+          <p>Notice the <strong>div</strong> which we'll put to use later. Now we'll create <code>setup.js</code> as our entry module, and <code>Main.js</code> which can do all the heavy lifting. Here's what <code>setup.js</code> should look like</p>
+          <script src="https://gist.github.com/kalegd/d31dad658d1627274bc63a250f275d05.js"></script>
+          <p>In our <code>Main.js</code> file we'll do the following steps</p>
+          <ol>
+            <li>Import three.module.js</li>
+            <li>Create a <em>renderer</em></li>
+            <li>Use the renderer to create a canvas element for <code>index.html</code></li>
+            <li>Create a <em>scene</em></li>
+            <li>Create a <em>camera</em> and add it to the scene</li>
+            <li>Create a simple Sphere + Cube</li>
+            <li>Group the Sphere + Cube together and add them to the scene</li>
+            <li>Add light to the scene so we can see our shapes in action</li>
+            <li>Create an <em>animation loop</em> that rotates our shapes and give it to the renderer</li>
+          </ol>
+          <p>Here's what all of this looks like</p>
+          <script src="https://gist.github.com/kalegd/cf15418d02b96e4fc15fb27dd60cb608.js"></script>
+          <blockquote>Side Note: Everything gets rendered in the canvas element with WebGL, something I hope you never have to worry about as three.js takes care of a whole ton of ugly WebGL things you don't want to</blockquote>
+          <p>Now if you open up your web page you should see something like this with your shapes rotating about their <em>local origin</em></p>
+          <img src="/images/tutorials/getting_started_with_webxr_part_1_image_1.png" width="100%">
+          <h3>Step 2</h3>
+          <p>There are a few cosmetic things we need to take care of before finishing</p>
+          <ol>
+            <li>Get rid of that pesky whitespace around our canvas to make this app properly take up the whole screen</li>
+            <li>Handle when the browser is resized (update size of canvas and aspect ratio) and don't let people scroll out of the page &#128520;</li>
+          </ol>
+          <p>To get rid of the whitespace, we just need an <code>index.css</code> with the following</p>
+          <script src="https://gist.github.com/kalegd/82b2f3c6d00cd3c40f3db65e7b56d5ea.js"></script>
+          <p>Whoa so easy! Don't forget to add <code>&lt;link rel="stylesheet" href="./index.css"&gt;</code> to your <code>index.html</code> file</p>
+          <p>Now we just add some event listeners to the bottom of our function in Main.js to handle resizing the webpage and to disable scrolling out of the page</p>
+          <script src="https://gist.github.com/kalegd/650a2762f6af93bf43cd9a7d47f2e73f.js"></script>
+          <p>Now we're all done with our full screen scene! Our codebase isn't the most well organized, but we'll take care of that in the next tutorial</p>
+          <p><a target="_blank" href="https://kalegd.github.io/getting_started_with_webxr_part_1">Finished code in action</a></p>
+          <p><a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_1">Git Repository</a></p>
+          <h3>Glossary</h3>
+          <ul>
+            <li><em>module</em> &ndash; The modern way of splitting up and importing your JavaScript files, now preferred over html script tags</li>
+            <li><em>three.jsi</em> &ndash; JavaScript library for creating and displaying 3D graphics</li>
+            <li><em>WebGL</em> &ndash; API for rendering graphics, compatible with modern web browsers and allowing for GPU accelerated processing native in the browser</li>
+            <li><em>renderer</em> &ndash; The beautiful beast that creates our scene via WebGL</li>
+            <li><em>scene</em> &ndash; This is what has all the information on what is to be rendered such as 3D models, lights, where these things are located, etc.</li>
+            <li><em>camera</em> &ndash; The point from which the user "sees" our scene</li>
+            <li><em>animation loop</em> &ndash; The function that gets called before every frame to orchestrate our scene</li>
+            <li><em>local origin</em> &ndash; Each object in three.js has a local coordinate system with the object initially at the origin. Adding an object as a child to another object and moving the parent within the parent's coordinate system won't effect the child's relationship with its own coordinate system</li>
+          </ul>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <p><a href="/tutorials/getting-started-with-webxr-part-2">Continue on to Part 2 &ndash; VR Sessions</a></p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

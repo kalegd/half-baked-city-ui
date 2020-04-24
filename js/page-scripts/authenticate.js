@@ -87,7 +87,7 @@ $("#signup-submit").click(function() {
     $("#signup-error-username").removeClass("show");
     $("#signup-error-username-length").removeClass("show");
     $("#signup-error-username-content").removeClass("show");
-    if(request.username.trim().length < 8 || request.username.trim().length > 32) {
+    if(request.username.trim().length < 2 || request.username.trim().length > 32) {
         $("#signup-error-username-length").addClass("show");
         return;
     } else if(request.username.match(usernamePattern) == null) {

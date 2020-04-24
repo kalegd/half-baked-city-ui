@@ -1,0 +1,40 @@
+blockquote {
+    margin-inline-start: 0px;
+    padding-inline-start: 40px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-left-style: solid;
+    border-left-color: #404040;
+    font-style: italic;
+}
+
+code {
+    background-color: #efefef;
+    border-radius: 5px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.tutorial-card {
+    background: white;
+}
+
+.tutorial {
+    width: 90%;
+    margin: auto;
+    max-width: 615px;
+}
+
+.tutorial img {
+    border-radius: 0;
+}
+
+.tutorial > p > a {
+    color: rgb(44,74,134);
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+li:not(:last-child) {
+    margin-bottom: 10px;
+}

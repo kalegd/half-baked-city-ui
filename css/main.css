@@ -33,7 +33,7 @@ a {
 }
 
 .classic-link {
-    color: -webkit-link;
+    color: rgb(0,0,238);
     cursor: pointer;
     text-decoration: underline;
 }
@@ -149,6 +149,10 @@ a {
     border-color: #4ca843;
 }
 
+.comments-section {
+    margin-top: 40px;
+}
+
 .comment-button {
     margin-right: 10%;
     color: #000000;
@@ -207,6 +211,16 @@ a {
     padding: 20px;
     width: 70%;
     max-width: 480px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+}
+
+.large-card {
+    margin: auto;
+    margin-top: 50px;
+    padding: 20px;
+    width: 85%;
+    max-width: 680px;
     background: rgba(255, 255, 255, 0.8);
     border-radius: 20px;
 }
@@ -279,6 +293,21 @@ a {
 
 .account-row {
     margin-bottom: 20px;
+}
+
+.tutorial-preview {
+    margin: auto;
+    margin-bottom: 20px;
+    padding: 20px;
+    width: 85%;
+    max-width: 680px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    color: rgb(44,74,134);
+}
+
+.tutorial-preview > h3 {
+    margin: 0;
 }
 
 .inline-flex {

@@ -1,4 +1,5 @@
 const API_URL = "https://oh9m8to7dl.execute-api.us-east-1.amazonaws.com/development"
+//const API_URL = "https://ppigk7wzo3.execute-api.us-east-1.amazonaws.com/production";
 
 const setImmersions = (appId, htmlId) => {
     $.ajax({

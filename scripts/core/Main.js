@@ -154,13 +154,20 @@ export default class Preview {
     }
 
     _loading() {
-        var timeDelta = this._clock.getDelta();
         if(global.loadingAssets.size == 0) {
             $(this._loadingMessage).removeClass("loading");
             this._sessionHandler.displayButton();
-            this._renderer.setAnimationLoop(() => { this._update() });
+            if(global.deviceType == "XR") {
+                this._renderer.setAnimationLoop((time, frame) => {
+                    this._inputHandler.update(frame);
+                    this._update();
+                });
+            } else {
+                this._renderer.setAnimationLoop(() => { this._update(); });
+            }
         } else {
-            $(this._loadingMessage).html("<h2>Loading " + global.loadingAssets.size + " more asset(s)</h2>");
+            $(this._loadingMessage).html("<h2>Loading "
+                + global.loadingAssets.size + " more asset(s)</h2>");
         }
     }
 

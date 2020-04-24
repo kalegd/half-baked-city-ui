@@ -1,0 +1,92 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="58fde296-49ea-43df-9609-f8fc7c8847ff">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="app-title text-center">Getting Started With WebXR Part 4 &ndash; Mobile Sessions</h2>
+          <p>I personally hate supporting mobile for WebXR applications, but many users will stumble across them with their phones so we might as well let them get a taste of our apps. And fortunately it's easy to do (everything has been pretty easy so far hasn't it?)</p>
+          <blockquote>It might be easy for you all now, but everything was changing so rapidly with the WebXR API and the browsers supporting it in 2019 that I was rewriting my code every month because of breaking changes and new ways of doing things. Everything is MUCH more stable now, so lucky you...</blockquote>
+          <h3>Step 1</h3>
+          <p>In this tutorial, we'll be extending <a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_3">our code from Part 3</a> to let Mobile users look around using their phone. Once again, three.js has a community supported component to handle this called <a target="_blank" href="https://github.com/mrdoob/three.js/tree/dev/examples/jsm/controls">DeviceOrientationControls.js</a> which utilizes the rotation of the phone</p>
+          <p>First things first, edit <code>DeviceOrientationControls.js</code> so that it points to the correct folder for wherever you have three.module.js</p>
+          <p>Now before we edit <code>SessionHandler.js</code> to use DeviceOrientationControls, let's edit <code>setup.js</code> to set our device type as Mobile when applicable. How do we know when a user is on a Mobile device?</p>
+          <p>Truthfully, there's no good way as far as I know. We set the deviceType as Pointer when we knew the user wasn't on an XR Device. Following that same branch of logic we'll assume that if the user doesn't have a Pointer that they're on a Mobile device</p>
+          <blockquote>This doesn't handle all cases, as some phones will register as having a pointer. But it's more trouble than it's worth to deal with those users. If you know a better way to determine if a user is coming from a mobile device, post a comment!</blockquote>
+          <p>Here's what our updated <code>setup.js</code> looks like</p>
+          <script src="https://gist.github.com/kalegd/76401b3fc818261b345b41db708fe387.js"></script>
+          <p>Now we can edit SessionHandler.js to check if the deviceType is MOBILE and if so, create a button that says Tap to Start along with setting <code>this._controls</code> to an instance of DeviceOrientationControls. We'll worry about hiding the button after tapping later</p>
+          <script src="https://gist.github.com/kalegd/9906a7167c55910dfa3aa3462251c13f.js"></script>
+          <p class="text-center"><em>Make sure to import DeviceOrientationControls</em></p>
+          <p>If we try and run this, we get an error. Why? DeviceOrientationControls behaves a little differently from PointerLockControls in that when we instantiate it, it will immediately request the device for permission to access orientation information. Similar to PointerLockControls, we need a user action before we request a lock, or in this case access to orientation data</p>
+          <p>So let's replace where we instantiate DeviceOrientationControls with this</p>
+          <script src="https://gist.github.com/kalegd/fc5a6dd0292434a997336feef43be929.js"></script>
+          <p>Now it doesn't throw an error, but it's still not working. What gives? Well by taking a peak inside DeviceOrientationControls.js we see we need to call an update function. Let's add an update function to our SessionHandler and call it from the update function in Main. Here's what our update in <code>SessionHandler.js</code> should look like</p>
+          <script src="https://gist.github.com/kalegd/4baadf6d421ca23bd763516f4fba3503.js"></script>
+          <p>You can see we added a little check to make sure we only call <code>this._controls.update()</code> when it is indeed possible so we don't throw any errors</p>
+          <p>We can now look around by just rotating your mobile device. But wait, doesn't that Tap to Start button look kind of small to you? We can fix this by adding <code>&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;</code> inside the <code>head</code> tag of <code>index.html</code></p>
+          <p>There we go, now we have a simple WebXR app that works on XR Device Browsers, Desktop / Laptop Browsers, and Mobile Browsers. Nice job!</p>
+          <p><a target="_blank" href="https://kalegd.github.io/getting_started_with_webxr_part_4">Finished code in action</a></p>
+          <p><a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_4">Git Repository</a></p>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,103 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="d70af465-6867-47d0-ac3d-5e2efe0dcb61">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="app-title text-center">Getting Started With WebXR Part 2 &ndash; VR Sessions</h2>
+          <p>This is the fun part where we can actually look around our scene in VR. Also, some much needed code cleaning will be done</p>
+          <h3>Step 1</h3>
+          <p>In this tutorial, we'll be extending <a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_1">our code from Part 1</a> so users can start an <em>immersive session</em>. This is actually quite easy to do by downloading a community supported component called <a target="_blank" href="https://github.com/mrdoob/three.js/tree/dev/examples/jsm/webxr">VRButton.js</a></p>
+          <p>This is where us having set up our js files as modules comes in handy. Otherwise, we'd have to rewrite VRButton.js, both now and anytime we'd want to use an updated version</p>
+          <p>So let's import VRButton into <code>Main.js</code> by adding <code>import { VRButton } from './VRButton.js';</code> below the line where we import three.module.js</p>
+          <p>Now we just enable xr in our renderer and add the Button to our DOM underneath where we initially created our renderer</p>
+          <script src="https://gist.github.com/kalegd/a41ee52f3ca84bd76a2f14e49369c0ea.js"></script>
+          <p>And we're all done! Whoa so easy. Now when you visit the website on a VR device you'll see something like this</p>
+          <img src="/images/tutorials/getting_started_with_webxr_part_2_image_1.png" width="100%">
+          <p>By clicking on "ENTER VR" you'll enter an immersive session where you can move and look around</p>
+          <p>If you're opening up the webpage on your computer or mobile phone, you'll see a message saying "VR NOT SUPPORTED". I don't actually like that, but we'll take care of handling that in the next tutorial after we add support to look around on desktop browsers as well</p>
+          <h3>Step 2</h3>
+          <p>Our code base quite frankly is one hot mess, so let's organize it a little better by creating the following functions and wrapping it all in a class</p>
+          <ul>
+            <li>createRenderer</li>
+            <li>createScene</li>
+            <li>createUser</li>
+            <li>createAssets</li>
+            <li>addEventListeners</li>
+          </ul>
+          <p>These functions will get filled out more as we continue on with our tutorials. But for right now it's just reorganizing code and no real additions or subtractions. Below is what everything should roughly look like after we finish cleaning up</p>
+          <script src="https://gist.github.com/kalegd/14938f33dd89a2c8040994b36bd49e5b.js"></script>
+          <blockquote>The "_" prefix is purely a style thing I like to employ for private variables as a habit from dart programming (where my flutter peeps at? &#128588;&#127997;)</blockquote>
+          <p>We'll also need to rename main to Main in <code>setup.js</code> and instantiate it with <code>new Main()</code></p>
+          <p>Now we're all set to add Desktop / Laptop support in the next tutorial!</p>
+          <p><a target="_blank" href="https://kalegd.github.io/getting_started_with_webxr_part_2">Finished code in action</a></p>
+          <p><a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_2">Git Repository</a></p>
+          <p></p>
+          <p></p>
+          <h3>Glossary</h3>
+          <ul>
+            <li><em>immersive session</em> &ndash; The technical name for a session in which immersive VR content is displayed to the user</li>
+          </ul>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <p><a href="/tutorials/getting-started-with-webxr-part-3">Continue on to Part 3 &ndash; Desktop / Laptop Sessions</a></p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

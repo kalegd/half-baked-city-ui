@@ -1,0 +1,120 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="11368d97-40a6-47b5-ad0f-2103919ea7a4">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="app-title text-center">Getting Started With WebXR Part 3 &ndash; Desktop / Laptop Sessions</h2>
+          <p>Before I begin, I'd like to mention how important it is in my opinion to make your WebXR apps cross platform. Why?</p>
+          <ul>
+            <li>Making your apps cross platform gives you a larger audience</li>
+            <li>More importantly, the experience your app provides via a desktop/mobile browser is obviously just a "taste" of what they could really be experiencing if they were in a VR headset</li>
+          </ul>
+          <p>That "taste" will entice more people to try VR out and grow our user base, increasing the demand for new hardware, developers, etc which in turn fuels progress in this still budding industry</p>
+          <h3>Step 1</h3>
+          <p>In this tutorial, we'll be extending <a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_2">our code from Part 2</a> to let Desktop / Laptop users look around using their mouse. Like before, three.js has a community supported component to handle this called <a target="_blank" href="https://github.com/mrdoob/three.js/tree/dev/examples/jsm/controls">PointerLockControls.js</a> which makes use of the <em>Pointer Lock API</em></p>
+          <p>First things first, edit <code>PointerLockControls.js</code> so that it points to the correct folder for wherever you have three.module.js</p>
+          <p>Let's start by creating a brand new module called <code>SessionHandler.js</code> that we'll move our VRButton creation into and that uses PointerLockControls like so</p>
+          <script src="https://gist.github.com/kalegd/6773fe5db86d2e2287efcdd0d1370279.js"></script>
+          <p class="text-center"><em>Make sure to delete the VRButton code from Main.js</em></p>
+          <p>Essentially what happens is our PointerLockControls takes care of tracking the mouse and rotating the camera around accordingly after it acquires a lock. It can only acquire a lock after user interaction, so we create an event handler to determine when the user clicks the screen and then request the lock</p>
+          <p>We'll import SessionHandler into Main.js with <code>import SessionHandler from './SessionHandler.js';</code> and then create an instance of it in the constructor right before setting the animation loop using <code>this._sessionHandler = new SessionHandler(this._renderer, this._camera);</code></p>
+          <p>And thus we're done adding functionality to let the user use the mouse to look around. Thank you three.js community for making life easy. We're not quite done just yet though</p>
+          <h3>Step 2</h3>
+          <p>There are plenty of cosmetic things we should do</p>
+          <ol>
+            <li>Display a Click to Start button similar to the VR Button instead of letting the user click anywhere on the screen</li>
+            <li>Don't display the VR Button when the user isn't coming from an XR Device, and likewise don't display the Click to Start button if the user is on an XR Device</li>
+            <li>Make the Click to Start Button disappear after the user clicks on it, and reappear when they unlock the pointer</li>
+          </ol>
+          <p>We'll handle the first thing by looking inside VRButton.js and seeing how they create their button. Using that as inspiration we can come up with something like this for <code>SessionHandler.js</code></p>
+          <script src="https://gist.github.com/kalegd/a76348c043ee9bae8d533a28df2f7a65.js"></script>
+          <blockquote>I opted for placing the button in a div to make it easier to center rather than using a set width to calculate displacement like in VRButton.js</blockquote>
+          <p>Unfortunately, now the VR Button covers our Click to Start button. It's time to figure out if our user is using an XR Device or not and use that information to decide which button to display. Once again if we look inside <code>VRButton.js</code> we'll find some useful code that we can add to <code>setup.js</code> so it looks like this</p>
+          <script src="https://gist.github.com/kalegd/d9679049fc8e46aba3d418e3265307ba.js"></script>
+          <p>Great, now we know right from the beginning whether our user is coming from an XR Device or not. All that's left to decide is how we get this information to our SessionHandler</p>
+          <p>We could pass the deviceType as an argument for Main, and then pass it from Main to the SessionHandler, but I personally would want to keep that information in a more global scope. So for this tutorial we'll make a module called global.js that just exports an empty dictionary that can be edited by any module that imports it. It looks like this</p>
+          <script src="https://gist.github.com/kalegd/94b7d6137b7d9bcccdc6f95b4db50db0.js"></script>
+          <p>Next we'll:</p>
+          <ul>
+            <li>Import global into <code>setup.js</code>, <code>Main.js</code>, and <code>SessionHandler.js</code> using <code>import global from './global.js';</code></li>
+            <li>Replace deviceType with global.deviceType in <code>setup.js</code></li>
+            <li>Check for <code>global.deviceType == "XR"</code> where we enable xr in the renderer in <code>Main.js</code></li>
+            <li>Check for <code>global.deviceType == "XR"</code> where we add the VRButton in <code>SessionHandler.js</code></li>
+            <li>Check for <code>global.deviceType == "POINTER"</code> where we setup the Pointer Start Button in <code>SessionHandler.js</code></li>
+          </ul>
+          <p>What follows is our Click to Start button is no longer hidden by the VR Button and is fully functional too. The only thing left to do is toggle whether it is displayed or not which we'll take care of after the 'click' listener we made for the button using</p>
+          <script src="https://gist.github.com/kalegd/41470f6ce9660c516d6832b1720e5274.js"></script>
+          <p>Great job, we now have a website that supports both VR browsers and Desktop / Laptop browsers providing custom start buttons depending on what device is being used</p>
+          <p>We're all set to add Mobile support in the last tutorial of the series!</p>
+          <p><a target="_blank" href="https://kalegd.github.io/getting_started_with_webxr_part_3">Finished code in action</a></p>
+          <p><a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_3">Git Repository</a></p>
+          <p></p>
+          <p></p>
+          <h3>Glossary</h3>
+          <ul>
+            <li><em>Pointer Lock API</em> &ndash; API that hides the mouse and provides data on mouse movement based on deltas rather than the limited positions on the screen</li>
+          </ul>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <p><a href="/tutorials/getting-started-with-webxr-part-4">Continue on to Part 4 &ndash; Mobile Sessions</a></p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

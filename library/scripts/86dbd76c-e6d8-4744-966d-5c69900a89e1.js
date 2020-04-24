@@ -18,6 +18,7 @@ export default class MusicVisualizerController {
         this.visualizations = [];
         this.selectedVisualization;
         this._apiUrl = "https://oh9m8to7dl.execute-api.us-east-1.amazonaws.com/development";
+        //this._apiUrl = "https://ppigk7wzo3.execute-api.us-east-1.amazonaws.com/production";
         this._update = this.update;
         this.update = this.preUpdate;
         this._sampleMusicId = instance['Sample Music'];
