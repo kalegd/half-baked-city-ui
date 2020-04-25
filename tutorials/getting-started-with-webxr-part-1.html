@@ -43,7 +43,7 @@
       <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
       <div class="large-card tutorial-card">
         <div class="tutorial">
-          <h2 class="app-title text-center">Getting Started With WebXR Part 1 &ndash; Creating a Scene</h2>
+          <h2 class="tutorial-title text-center">Getting Started With WebXR Part 1 &ndash; Creating a Scene</h2>
           <p>This tutorial series will focus on:<p>
           <ol>
             <li>Creating a scene</li>
@@ -51,14 +51,15 @@
             <li><a href="/tutorials/getting-started-with-webxr-part-3">Allowing users to look around the scene on Desktop / Laptop</a></li>
             <li><a href="/tutorials/getting-started-with-webxr-part-4">Allowing users to look around the scene on mobile</a></li>
           </ol>
-          <p>By the end of this tutorial series, we'll end up with a <a target="_blank" href="https://kalegd.github.io/getting_started_with_webxr_part_4">WebXR page accessible by XR Browsers, Desktop / Laptop Browsers, and Mobile Browsers</a></p>
+          <p>By the end of this tutorial series, we'll end up with a <a target="_blank" href="https://kalegd.github.io/tutorials/getting_started_with_webxr_part_4">WebXR page accessible by XR Browsers, Desktop / Laptop Browsers, and Mobile Browsers</a></p>
           <h3>Step 1</h3>
           <p>The first thing we'll do is download the <em>module</em> build of <em>three.js</em> from <a target="_blank" href="https://github.com/mrdoob/three.js/tree/dev/build">here</a>. This tutorial is up to date with <a target="_blank" href="https://github.com/mrdoob/three.js/tree/r115">r115</a></p>
           <blockquote>three.js has a bunch of community supported components written as both scripts and modules, but are soon ending support for the scripts in favor of just maintaining the modules. Best to get used to using ES6 Modules now if you want to use those components, which we will in these tutorials</blockquote>
+          <p>Setup a directory for it like so: <code>/scripts/three/build/three.module.js</code></p>
           <p>Next, we'll create an html document called <code>index.html</code> and includes a script tag pointing to a module we'll soon write called <code>setup.js</code></p>
           <script src="https://gist.github.com/kalegd/61e8d19c7789a6ecb7ca4765b2b1ffd2.js"></script>
           <blockquote>ES6 Fact: Only modules can import other modules</blockquote>
-          <p>Notice the <strong>div</strong> which we'll put to use later. Now we'll create <code>setup.js</code> as our entry module, and <code>Main.js</code> which can do all the heavy lifting. Here's what <code>setup.js</code> should look like</p>
+          <p>Notice the <strong>div</strong> which we'll put to use later. Now we'll create <code>/scripts/core/setup.js</code> as our entry module, and <code>/scripts/core/Main.js</code> which can do all the heavy lifting. Here's what <code>setup.js</code> should look like</p>
           <script src="https://gist.github.com/kalegd/d31dad658d1627274bc63a250f275d05.js"></script>
           <p>In our <code>Main.js</code> file we'll do the following steps</p>
           <ol>
@@ -83,13 +84,13 @@
             <li>Get rid of that pesky whitespace around our canvas to make this app properly take up the whole screen</li>
             <li>Handle when the browser is resized (update size of canvas and aspect ratio) and don't let people scroll out of the page &#128520;</li>
           </ol>
-          <p>To get rid of the whitespace, we just need an <code>index.css</code> with the following</p>
+          <p>To get rid of the whitespace, we just need some css. Create <code>/css/index.css</code> with the following</p>
           <script src="https://gist.github.com/kalegd/82b2f3c6d00cd3c40f3db65e7b56d5ea.js"></script>
-          <p>Whoa so easy! Don't forget to add <code>&lt;link rel="stylesheet" href="./index.css"&gt;</code> to your <code>index.html</code> file</p>
+          <p>Whoa so easy! Don't forget to add <code>&lt;link rel="stylesheet" href="./css/index.css"&gt;</code> to your <code>index.html</code> file</p>
           <p>Now we just add some event listeners to the bottom of our function in Main.js to handle resizing the webpage and to disable scrolling out of the page</p>
           <script src="https://gist.github.com/kalegd/650a2762f6af93bf43cd9a7d47f2e73f.js"></script>
           <p>Now we're all done with our full screen scene! Our codebase isn't the most well organized, but we'll take care of that in the next tutorial</p>
-          <p><a target="_blank" href="https://kalegd.github.io/getting_started_with_webxr_part_1">Finished code in action</a></p>
+          <p><a target="_blank" href="https://kalegd.github.io/tutorials/getting_started_with_webxr_part_1">Finished code in action</a></p>
           <p><a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_1">Git Repository</a></p>
           <h3>Glossary</h3>
           <ul>

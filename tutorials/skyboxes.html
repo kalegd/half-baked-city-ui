@@ -1,0 +1,95 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="3bd10048-af08-4e6c-97a9-459865ede218">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="tutorial-title text-center">Skyboxes</h2>
+          <p>In this tutorial we're going to create a Skybox so users can have something to look at in the background of our scene</p>
+          <h3>Step 1</h3>
+          <p>We'll use the finished code from <a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_4">Getting Started With WebXR Part 4</a> as our starting point. After you download the code for that project, go ahead and delete everything that's in the <code>_createAssets()</code> function in <code>/scripts/core/Main.js</code> and take out the 3 lines dealing with rotating shapes in <code>_update()</code></p>
+          <p>Before we write any new code, let's find ourselves a Skybox! If you have one already you want to use, go ahead and use it, otherwise <a href="https://twitter.com/wwwtyro">wwwtyro</a> made this amazing <a href="http://wwwtyro.github.io/space-3d/">space skybox generator</a> which you can download one from</p>
+          <p>For those who have a skybox, name the files as <code>back.png</code>, <code>bottom.png</code>, <code>front.png</code>, <code>left.png</code>, <code>right.png</code>, and <code>top.png</code> (replace <code>.png</code> with whatever extension your images use)
+          <p>Now we'll place all of our skybox files into the same directory, which for this tutorial I'll use <code>/images/skyboxes/space/</code></p></p>
+          <h3>Step 2</h3>
+          <p>Time to write some code. Let's create a new folder called <code>/scripts/components/</code> and add a file there called <code>Skybox.js</code></p>
+          <p>In <code>Skybox.js</code> let's have a class that:</p>
+          <ol>
+            <li>Accepts both the path of our skybox files and the extension of those files in the constructor</li>
+            <li>Has a function <code>addToScene(scene)</code> that tries to build the Skybox when called</li>
+            <li>Creates the box of textures using <code>THREE.CubeTextureLoader</code></li>
+            <li>Sets the background of our scene as the loaded texture</li>
+          </ol>
+          <p>Doing those things should lead to something like this</p>
+          <script src="https://gist.github.com/kalegd/f6021492aafae1a341444704e1a0bf2d.js"></script>
+          <p class="text-center"><a href="https://threejs.org/docs/#api/en/loaders/CubeTextureLoader">Documentation for CubeTextureLoader</a></p>
+          <p>All that's left is creating an instance of our Skybox in <code>Main.js</code>, so let's fill in <code>_createAssets()</code> to look like this</p>
+          <p class="text-center"><em>Remember to import Skybox!</em></p>
+          <p>Firing up our website give us this pretty cool scene we can look around</p>
+          <p><a target="_blank" href="https://kalegd.github.io/tutorials/skyboxes">Finished code in action</a></p>
+          <p><a target="_blank" href="https://github.com/kalegd/skyboxes_tutorial">Git Repository</a></p>
+          <p>We're all done with this tutorial, but keep reading if you're interested in a possible enhancement you can add and how to go about it</p>
+          <p>If you want to have a skybox that's rotating along one of its axis, rather than using the background property of a scene one could apply the texture to an actual BoxGeometry and then rotate the Mesh along that axis. Considerations with this are your camera's maximum rendering distance. You don't want to make your Skybox so large that the longest distance the user could be to one of the box's corners is greater than the maximum rendering distance. Otherwise, you'll experience clipping and parts of your Skybox will be black</p>
+          <p><a target="_blank" href="https://github.com/kalegd/skyboxes_tutorial">This branch of the repo</a> shows an example of the enhancement</p>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

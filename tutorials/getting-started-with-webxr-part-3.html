@@ -43,7 +43,7 @@
       <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
       <div class="large-card tutorial-card">
         <div class="tutorial">
-          <h2 class="app-title text-center">Getting Started With WebXR Part 3 &ndash; Desktop / Laptop Sessions</h2>
+          <h2 class="tutorial-title text-center">Getting Started With WebXR Part 3 &ndash; Desktop / Laptop Sessions</h2>
           <p>Before I begin, I'd like to mention how important it is in my opinion to make your WebXR apps cross platform. Why?</p>
           <ul>
             <li>Making your apps cross platform gives you a larger audience</li>
@@ -52,8 +52,8 @@
           <p>That "taste" will entice more people to try VR out and grow our user base, increasing the demand for new hardware, developers, etc which in turn fuels progress in this still budding industry</p>
           <h3>Step 1</h3>
           <p>In this tutorial, we'll be extending <a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_2">our code from Part 2</a> to let Desktop / Laptop users look around using their mouse. Like before, three.js has a community supported component to handle this called <a target="_blank" href="https://github.com/mrdoob/three.js/tree/dev/examples/jsm/controls">PointerLockControls.js</a> which makes use of the <em>Pointer Lock API</em></p>
-          <p>First things first, edit <code>PointerLockControls.js</code> so that it points to the correct folder for wherever you have three.module.js</p>
-          <p>Let's start by creating a brand new module called <code>SessionHandler.js</code> that we'll move our VRButton creation into and that uses PointerLockControls like so</p>
+          <p>Start by placing <code>PointerLockControls.js</code> into <code>/scripts/three/examples/jsm/controls/</code> because it has a relative import to three.module.js</p>
+          <p>Now let's create a brand new module called <code>/scripts/core/SessionHandler.js</code> that we'll move our VRButton creation into and that uses PointerLockControls like so</p>
           <script src="https://gist.github.com/kalegd/6773fe5db86d2e2287efcdd0d1370279.js"></script>
           <p class="text-center"><em>Make sure to delete the VRButton code from Main.js</em></p>
           <p>Essentially what happens is our PointerLockControls takes care of tracking the mouse and rotating the camera around accordingly after it acquires a lock. It can only acquire a lock after user interaction, so we create an event handler to determine when the user clicks the screen and then request the lock</p>
@@ -86,7 +86,7 @@
           <script src="https://gist.github.com/kalegd/41470f6ce9660c516d6832b1720e5274.js"></script>
           <p>Great job, we now have a website that supports both VR browsers and Desktop / Laptop browsers providing custom start buttons depending on what device is being used</p>
           <p>We're all set to add Mobile support in the last tutorial of the series!</p>
-          <p><a target="_blank" href="https://kalegd.github.io/getting_started_with_webxr_part_3">Finished code in action</a></p>
+          <p><a target="_blank" href="https://kalegd.github.io/tutorials/getting_started_with_webxr_part_3">Finished code in action</a></p>
           <p><a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_3">Git Repository</a></p>
           <p></p>
           <p></p>

@@ -43,12 +43,12 @@
       <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
       <div class="large-card tutorial-card">
         <div class="tutorial">
-          <h2 class="app-title text-center">Getting Started With WebXR Part 2 &ndash; VR Sessions</h2>
+          <h2 class="tutorial-title text-center">Getting Started With WebXR Part 2 &ndash; VR Sessions</h2>
           <p>This is the fun part where we can actually look around our scene in VR. Also, some much needed code cleaning will be done</p>
           <h3>Step 1</h3>
           <p>In this tutorial, we'll be extending <a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_1">our code from Part 1</a> so users can start an <em>immersive session</em>. This is actually quite easy to do by downloading a community supported component called <a target="_blank" href="https://github.com/mrdoob/three.js/tree/dev/examples/jsm/webxr">VRButton.js</a></p>
           <p>This is where us having set up our js files as modules comes in handy. Otherwise, we'd have to rewrite VRButton.js, both now and anytime we'd want to use an updated version</p>
-          <p>So let's import VRButton into <code>Main.js</code> by adding <code>import { VRButton } from './VRButton.js';</code> below the line where we import three.module.js</p>
+          <p>So let's import VRButton into <code>Main.js</code> by adding <code>import { VRButton } from '../three/examples/jsm/webxr/VRButton.js';</code> below the line where we import three.module.js</p>
           <p>Now we just enable xr in our renderer and add the Button to our DOM underneath where we initially created our renderer</p>
           <script src="https://gist.github.com/kalegd/a41ee52f3ca84bd76a2f14e49369c0ea.js"></script>
           <p>And we're all done! Whoa so easy. Now when you visit the website on a VR device you'll see something like this</p>
@@ -69,7 +69,7 @@
           <blockquote>The "_" prefix is purely a style thing I like to employ for private variables as a habit from dart programming (where my flutter peeps at? &#128588;&#127997;)</blockquote>
           <p>We'll also need to rename main to Main in <code>setup.js</code> and instantiate it with <code>new Main()</code></p>
           <p>Now we're all set to add Desktop / Laptop support in the next tutorial!</p>
-          <p><a target="_blank" href="https://kalegd.github.io/getting_started_with_webxr_part_2">Finished code in action</a></p>
+          <p><a target="_blank" href="https://kalegd.github.io/tutorials/getting_started_with_webxr_part_2">Finished code in action</a></p>
           <p><a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_2">Git Repository</a></p>
           <p></p>
           <p></p>
