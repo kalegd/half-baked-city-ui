@@ -1,0 +1,81 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="5e5c3fa4-c642-493d-9cce-95bfff28ac2d">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="tutorial-title text-center">Testing on Android Devices (Oculus Quest Included)</h2>
+          <p>For those who went through the <a target="_blank" href="/tutorials/getting-started-with-webxr-part-1">Getting Started With WebXR Series</a>, you may be wondering how to test things. This tutorial will go through my method of testing things on Android Devices (the Oculus Quest is an Android Device too)</p>
+          <h3>Step 1</h3>
+          <p>Let's build a web server. I like Python3, so we're going to use that. If you don't have Python3, well then <a target="_blank" href="https://www.youtube.com/watch?v=uDSpkQ8U2Hs&t=64s">figure it out</a></p>
+          <p>Once you have Python3, you just get yourself into the root directory of your project via the terminal, and then run <code>python3 -m http.server 8100 --bind 127.0.0.1</code> and you're done. What this does is create a little web server on your localhost 127.0.0.1 over port 8100</p>
+          <p>Well we have a web server, but how do we get our Android devices to connect to it if it's running on the localhost of our computer?</p>
+          <blockquote>Many APIs including the WebXR API require a secure context in order to work. Even though we created an http server instead of an https one, localhost is still considered a secure context, so we will use port forwarding to have our android device's localhost point to the computer's</blockquote>
+          <h3>Step 2</h3>
+          <p>Make sure Developer Mode is on and, depending on your device, enable USB Debugging. After that connect your device to your computer. Oculus Quest users may get a prompt in their headset to trust the connection from the connected computer, so put your headset on just in case the prompt appears</p>
+          <p>Fire up Chrome, and enter <code>chrome://inspect/#devices</code> in your URL and head over there</p>
+          <p>Click on the "Port forwarding..." button and make an entry of <code>8100</code> for the Port column and <code>localhost:8100</code> for the IP address and port column</p>
+          <p>When you visit a page on your Android Device's web browser, you should see it listed under the appropriate remote target on your computer via chrome and can now see logs/debug it</p>
+          <p>That's it, short and simple, the way things should be</p>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

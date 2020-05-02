@@ -1,0 +1,100 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="5e5c3fa4-c642-493d-9cce-95bfff28ac2d">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="tutorial-title text-center">glTF Assets</h2>
+          <p>In this tutorial we're going to learn how to use glTF Assets so we can populate our scene with cool stuff. Animations will be covered in a future tutorial</p>
+          <h3>Step 1</h3>
+          <p>We'll use the finished code from the <a target="_blank" href="https://github.com/kalegd/skyboxes_tutorial">Skyboxes Tutorial</a> as our starting point</p>
+          <p>Before we write any new code, let's find ourselves some cool assets on <a target="_blank" href="https://sketchfab.com">Sketchfab</a>! If you have some already and want to use them feel free to. I'll be using this <a target="_blank" href="https://sketchfab.com/3d-models/lowpoly-spaceship-concept-61bb9ef411994ed496b4c033614716c5">Low Poly Spaceship</a> and this <a target="_blank" href="https://sketchfab.com/3d-models/lowpoly-planet-9644beab61d544de8fb93fe8faeb99be">Low Poly Planet</a> both made by <a target="_blank" href="https://sketchfab.com/wjs991">wjs991</a></p>
+          <blockquote>I'm using low poly assets to speed up loading the demo for those with bad internet connections (but really because it's cheaper for me bandwidth-wise hehe)</blockquote>
+          <p>You're likely to notice that the assets you downloaded have more files than just a <code>.gltf</code> file. They probably have a directory for textures and a <code>.bin</code> file as well. I like dealing with a single file per 3D asset, so let's turn each bundle into a <code>.glb</code> file using <a target="_blank" href="https://glb-packer.glitch.me/">this amazingly simple utility</a> made by <a target="_blank" href="https://twitter.com/msfeldstein">Michael Feldstein</a></p>
+          <blockquote>A GLB file is just a binary version of a glTF file including their textures and other relevant files all together</blockquote>
+          <p>Now we'll place all of our <code>.glb</code> files into the same directory, which for this tutorial I'll use <code>/models/</code></p></p>
+          <h3>Step 2</h3>
+          <p>Thre three.js community comes to the rescue once again with the plugin <a target="_blank" href="https://github.com/mrdoob/three.js/tree/dev/examples/jsm/loaders">GLTFLoader.js</a> that handles loading glTF files. Let's make a folder for it and place it in <code>/scripts/three/examples/jsm/loaders/</code></p>
+          <p>Time to write some code. Let's create a class to handle our static models called <code>/scripts/components/GLTFAsset.js</code></p>
+          <p>In our class we'll need:</p>
+          <ol>
+            <li>A constructor that accepts the filename, scale, position, and rotation as parameters</li>
+            <li>An instance of <code>THREE.Object3D</code> called <code>_pivotPoint</code> that we'll apply our transformations on</li>
+            <li>To use <code>GLTFLoader</code> to load in our asset and add it as a child to <code>_pivotPoint</code></li>
+            <li>A function <code>addToScene(parent)</code> that adds <code>_pivotPoint</code> to the provided parent when called</li>
+          </ol>
+          <p>Doing those things should lead to something like this</p>
+          <script src="https://gist.github.com/kalegd/0f694bb36cf4d3086197b6ca6b39392e.js"></script>
+          <p class="text-center"><a target="_blank" href="https://threejs.org/docs/#api/en/core/Object3D">Documentation for Object3D</a> / <a target="_blank" href="https://threejs.org/docs/#examples/en/loaders/GLTFLoader">Documentation for GLTFLoader</a></p>
+          <blockquote>Using a pivot point instead of just adding the asset to the scene gives us some flexibility. Namely, we can immediately apply transformations and add the pivot point to the scene without having to wait for the asset to load first. Once the asset does load and is added to the pivot point, those transformations will apply to it and all other children of the pivot point</blockquote>
+          <p>Let's try importing <code>GLTFAsset</code> into <code>Main.js</code> and adding our spaceship to the scene in front of us so we can see it. Below where we create the Skybox in <code>_createAssets()</code> add the following</p>
+          <script src="https://gist.github.com/kalegd/7cf42a60c82db47f9f4e8255c5aabaf8.js"></script>
+          <p>When we run our app we can see our spaceship all around us which means it's waaaayyyyy too big for what we want. Let's scale it to 1/100 of it's original size. Now it looks much better when we run it. Go ahead and add the planet as well and transform the assets however you like to create your scene. Mine looks like this</p>
+          <img src="/images/tutorials/gltf_assets_image_1.jpg" width="100%">
+          <p>I used the following transformations</p>
+          <script src="https://gist.github.com/kalegd/252dfc310cd8cf7323453a7d6fc64eb0.js"></script>
+          <p>Well that's it for this tutorial. Easy peasy just the way I like it</p>
+          <p><a target="_blank" href="https://kalegd.github.io/tutorials/gltf_assets">Finished code in action</a></p>
+          <p><a target="_blank" href="https://github.com/kalegd/gltf_assets_tutorial">Git Repository</a></p>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

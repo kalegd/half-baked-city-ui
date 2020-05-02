@@ -24,7 +24,7 @@
       });
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="id" content="3bd10048-af08-4e6c-97a9-459865ede218">
+    <meta name="id" content="5e5c3fa4-c642-493d-9cce-95bfff28ac2d">
   </head>
   <body>
     <div class="header">
@@ -47,7 +47,7 @@
           <p>In this tutorial we're going to create a Skybox so users can have something to look at in the background of our scene</p>
           <h3>Step 1</h3>
           <p>We'll use the finished code from <a target="_blank" href="https://github.com/kalegd/getting_started_with_webxr_part_4">Getting Started With WebXR Part 4</a> as our starting point. After you download the code for that project, go ahead and delete everything that's in the <code>_createAssets()</code> function in <code>/scripts/core/Main.js</code> and take out the 3 lines dealing with rotating shapes in <code>_update()</code></p>
-          <p>Before we write any new code, let's find ourselves a Skybox! If you have one already you want to use, go ahead and use it, otherwise <a href="https://twitter.com/wwwtyro">wwwtyro</a> made this amazing <a href="http://wwwtyro.github.io/space-3d/">space skybox generator</a> which you can download one from</p>
+          <p>Before we write any new code, let's find ourselves a Skybox! If you have one already you want to use, go ahead and use it, otherwise <a target="_blank" href="https://twitter.com/wwwtyro">wwwtyro</a> made this amazing <a target="_blank" href="http://wwwtyro.github.io/space-3d/">space skybox generator</a> which you can download one from</p>
           <p>For those who have a skybox, name the files as <code>back.png</code>, <code>bottom.png</code>, <code>front.png</code>, <code>left.png</code>, <code>right.png</code>, and <code>top.png</code> (replace <code>.png</code> with whatever extension your images use)
           <p>Now we'll place all of our skybox files into the same directory, which for this tutorial I'll use <code>/images/skyboxes/space/</code></p></p>
           <h3>Step 2</h3>
@@ -61,15 +61,18 @@
           </ol>
           <p>Doing those things should lead to something like this</p>
           <script src="https://gist.github.com/kalegd/f6021492aafae1a341444704e1a0bf2d.js"></script>
-          <p class="text-center"><a href="https://threejs.org/docs/#api/en/loaders/CubeTextureLoader">Documentation for CubeTextureLoader</a></p>
+          <p class="text-center"><a target="_blank" href="https://threejs.org/docs/#api/en/loaders/CubeTextureLoader">Documentation for CubeTextureLoader</a></p>
           <p>All that's left is creating an instance of our Skybox in <code>Main.js</code>, so let's fill in <code>_createAssets()</code> to look like this</p>
+          <script src="https://gist.github.com/kalegd/77c9f74c7488bb24ef53b0f3d45849cc.js"></script>
           <p class="text-center"><em>Remember to import Skybox!</em></p>
           <p>Firing up our website give us this pretty cool scene we can look around</p>
+          <img src="/images/tutorials/skyboxes_image_1.jpg" width="100%">
           <p><a target="_blank" href="https://kalegd.github.io/tutorials/skyboxes">Finished code in action</a></p>
           <p><a target="_blank" href="https://github.com/kalegd/skyboxes_tutorial">Git Repository</a></p>
           <p>We're all done with this tutorial, but keep reading if you're interested in a possible enhancement you can add and how to go about it</p>
-          <p>If you want to have a skybox that's rotating along one of its axis, rather than using the background property of a scene one could apply the texture to an actual BoxGeometry and then rotate the Mesh along that axis. Considerations with this are your camera's maximum rendering distance. You don't want to make your Skybox so large that the longest distance the user could be to one of the box's corners is greater than the maximum rendering distance. Otherwise, you'll experience clipping and parts of your Skybox will be black</p>
-          <p><a target="_blank" href="https://github.com/kalegd/skyboxes_tutorial">This branch of the repo</a> shows an example of the enhancement</p>
+          <p>If you want to have a skybox that's rotating along one of its axis, you can't use the background property of the scene at this time. You might be able to in the future, so keep an eye out for <a target="_blank" href="https://github.com/mrdoob/three.js/issues/16328">this issue on GitHub</a>. If you don't mind a slightly less performant solution, rather than using the background property of a scene one could apply the texture to an actual BoxGeometry and then rotate the Mesh along that axis. Considerations with this are your camera's maximum rendering distance. You don't want to make your Skybox so large that the longest distance the user could be to one of the box's corners is greater than the maximum rendering distance. Otherwise, you'll experience clipping and parts of your Skybox will be black</p>
+          <blockquote>Using a cube mesh is less performant because then your cpu is more involved in the process of rotating your skybox</blockquote>
+          <p><a target="_blank" href="https://github.com/kalegd/skyboxes_tutorial/tree/enhancement">This branch of the repo</a> shows an example of the enhancement using the less performant solution</p>
           <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
           <div class="comments-section text-center">
             <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>

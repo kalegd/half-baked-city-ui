@@ -15,6 +15,16 @@ code {
     padding-right: 3px;
 }
 
+h3 {
+    margin-top: 40px;
+    color: #3e3e3e;
+}
+
+.tutorial-title {
+    font-weight: bold;
+    color: #3e3e3e;
+}
+
 .tutorial-card {
     background: white;
 }
@@ -29,7 +39,7 @@ code {
     border-radius: 0;
 }
 
-.tutorial > p > a {
+.tutorial > p > a, .tutorial > ol > li > a {
     color: rgb(44,74,134);
     cursor: pointer;
     text-decoration: underline;

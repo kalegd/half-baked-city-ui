@@ -1,0 +1,90 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <title>Half Baked City</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="5e5c3fa4-c642-493d-9cce-95bfff28ac2d">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="tutorial-title text-center">Testing on iPhones</h2>
+          <p>For those who went through the <a target="_blank" href="/tutorials/getting-started-with-webxr-part-1">Getting Started With WebXR Series</a>, you may be wondering how to test things. This tutorial will go through my method of testing things on iPhones</p>
+          <h3>Step 1</h3>
+          <p>First thing is get yourself a self signed certificate. I'll let you <a target="_blank" href="https://www.youtube.com/watch?v=uDSpkQ8U2Hs&t=64s">figure it out</a></p>
+          <p>Unfortunately we need to setup an https server because the Device Orientation API requires a secure context and we have no way of forwarding the iPhone's localhost to the computer's &#128546;</p>
+          <p>Hopefully you figured out how to get some self signed ssl certs, so now let's build a secure web server. I like Python3, so we're going to use that. If you don't have Python3, then <a target="_blank" href="https://www.youtube.com/watch?v=uDSpkQ8U2Hs&t=64s">figure it out</a></p>
+          <p>Once you have Python3, create a little python script file called <code>run_https_server.py</code> with the following lines of code</p>
+          <script src="https://gist.github.com/kalegd/7ffb070961d04528a791338452a2c2f2.js"></script>
+          <p class="text-center"><em>Replace the paths to the keyfile and certfile with the path to your files</em></p>
+          <p>Now when you run this script with <code>python3 run_https_server.py</code> you'll have an https server running on port 4443</p>
+          <p>To connect to your webserver from your iPhone you'll need to make sure your computer and iPhone are on the same network. Then find out the ip address of your computer with <code>ifconfig</code>. After you find out the ip address you can enter <code>https://YOUR_IP_ADDRESS:4443</code> in the url of Safari and then reach your web server</p>
+          <h3>Step 2</h3>
+          <p>Now we'll figure out how to debug things</p>
+          <ol>
+            <li>Connect your iPhone to the computer</li>
+            <li>On your phone, open your webpage in Safari</li>
+            <li>On your computer, open up Safari Technology Preview</li>
+            <li><a target="_blank" href="https://support.apple.com/guide/safari/use-the-developer-tools-in-the-develop-menu-sfri20948/mac">Enable the Develop Menu</a> if you haven't already</li>
+            <li>Go to Develop-&gt;Your iPhone-&gt;The web page you're running</li>
+          </ol>
+          <p>Great, now you're able to easily see logs and debug things!</p>
+          <p>I do apologize for not being much help in making self signed certificates or installing Python3, but there's a lot of ways to do things depending on your computer so I wouldn't be of much help even if I tried</p>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>
