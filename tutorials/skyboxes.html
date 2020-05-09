@@ -9,7 +9,6 @@
 
       gtag('config', 'UA-156915208-1');
     </script>
-    <title>Half Baked City</title>
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/tutorial.css">
     <script type="text/javascript" src="/js/constants.js" defer></script>
@@ -23,6 +22,8 @@
         enable_page_level_ads: true
       });
     </script>
+    <title>WebXR Tutorials - Skyboxes</title>
+    <meta name="description" content="Learn how to add Skybox to your WebXR Website in this tutorial">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="id" content="5e5c3fa4-c642-493d-9cce-95bfff28ac2d">
   </head>
@@ -67,9 +68,9 @@
           <p class="text-center"><em>Remember to import Skybox!</em></p>
           <p>Firing up our website give us this pretty cool scene we can look around</p>
           <img src="/images/tutorials/skyboxes_image_1.jpg" width="100%">
+          <p>We're all done with this tutorial, but keep reading if you're interested in a possible enhancement you can add and how to go about it</p>
           <p><a target="_blank" href="https://kalegd.github.io/tutorials/skyboxes">Finished code in action</a></p>
           <p><a target="_blank" href="https://github.com/kalegd/skyboxes_tutorial">Git Repository</a></p>
-          <p>We're all done with this tutorial, but keep reading if you're interested in a possible enhancement you can add and how to go about it</p>
           <p>If you want to have a skybox that's rotating along one of its axis, you can't use the background property of the scene at this time. You might be able to in the future, so keep an eye out for <a target="_blank" href="https://github.com/mrdoob/three.js/issues/16328">this issue on GitHub</a>. If you don't mind a slightly less performant solution, rather than using the background property of a scene one could apply the texture to an actual BoxGeometry and then rotate the Mesh along that axis. Considerations with this are your camera's maximum rendering distance. You don't want to make your Skybox so large that the longest distance the user could be to one of the box's corners is greater than the maximum rendering distance. Otherwise, you'll experience clipping and parts of your Skybox will be black</p>
           <blockquote>Using a cube mesh is less performant because then your cpu is more involved in the process of rotating your skybox</blockquote>
           <p><a target="_blank" href="https://github.com/kalegd/skyboxes_tutorial/tree/enhancement">This branch of the repo</a> shows an example of the enhancement using the less performant solution</p>
