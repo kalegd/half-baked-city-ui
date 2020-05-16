@@ -45,6 +45,7 @@
       <div class="large-card tutorial-card">
         <div class="tutorial">
           <h2 class="tutorial-title text-center">Getting Started With WebXR Part 1 &ndash; Creating a Scene</h2>
+          <p class="text-center"><em>For those who have never built a website, my advice is to familiarize yourself with web development before beginning this tutorial</em></p>
           <p>This tutorial series will focus on:<p>
           <ol>
             <li>Creating a scene</li>
@@ -57,7 +58,7 @@
           <p>The first thing we'll do is download the <em>module</em> build of <em>three.js</em> from <a target="_blank" href="https://github.com/mrdoob/three.js/tree/dev/build">here</a>. This tutorial is up to date with <a target="_blank" href="https://github.com/mrdoob/three.js/tree/r115">r115</a></p>
           <blockquote>three.js has a bunch of community supported components written as both scripts and modules, but are soon ending support for the scripts in favor of just maintaining the modules. Best to get used to using ES6 Modules now if you want to use those components, which we will in these tutorials</blockquote>
           <p>Setup a directory for it like so: <code>/scripts/three/build/three.module.js</code></p>
-          <p>Next, we'll create an html document called <code>index.html</code> and includes a script tag pointing to a module we'll soon write called <code>setup.js</code></p>
+          <p>Next, we'll create an html document called <code>index.html</code> that includes a script tag pointing to a module we'll soon write called <code>setup.js</code></p>
           <script src="https://gist.github.com/kalegd/61e8d19c7789a6ecb7ca4765b2b1ffd2.js"></script>
           <blockquote>ES6 Fact: Only modules can import other modules</blockquote>
           <p>Notice the <strong>div</strong> which we'll put to use later. Now we'll create <code>/scripts/core/setup.js</code> as our entry module, and <code>/scripts/core/Main.js</code> which can do all the heavy lifting. Here's what <code>setup.js</code> should look like</p>

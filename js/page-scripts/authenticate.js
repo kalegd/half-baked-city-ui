@@ -117,10 +117,12 @@ $("#signup-submit").click(function() {
         error: function(xhr, status, error) {
             let response = xhr.responseJSON;
             $("#signup-processing").removeClass("show");
-            if(response.message.includes("username")) {
-                $("#signup-error-username").addClass("show");
-            } else if(response.message.includes("emailAddress")) {
-                $("#signup-error-email").addClass("show");
+            if(response.message.includes("already in use")) {
+                if(response.message.includes("@")) {
+                    $("#signup-error-email").addClass("show");
+                } else {
+                    $("#signup-error-username").addClass("show");
+                }
             } else {
                 $("#signup-error-server").addClass("show");
             }
