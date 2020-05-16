@@ -54,7 +54,6 @@ $("#login-submit").click(function() {
         dataType: 'json',
         success: function(response) {
             $("#login-processing").removeClass("show");
-            console.log(response);
             if(response.data.user.status == "REGISTERED") {
                 $("#login-error-verify").addClass("show");
                 jwt = response.data.jwt;
