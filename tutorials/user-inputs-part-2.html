@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <title>WebXR Tutorials - User Inputs Part 2</title>
+    <meta name="description" content="Learn how to accept input from keyboards in your WebXR Websites with this tutorial">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="5e5c3fa4-c642-493d-9cce-95bfff28ac2d">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="tutorial-title text-center">User Inputs Part 2 &ndash; Keyboards</h2>
+          <p>In this tutorial, we'll be extending <a target="_blank" href="https://github.com/kalegd/user_inputs_part_1">our code from Part 1</a> to listen for user input via keyboards</p>
+          <h3>Step 1</h3>
+          <p>We have a lot of keys to keep track of when detecting input from keyboards. Rather than storing a bunch of booleans for every key, we can instead use a <em>Set</em>. If the key is contained in the set, then we know the user is currently pressing it, otherwise they're not. We can update the set based off of the <code>keydown</code> and <code>keyup</code> events. Here's what our updated <code>InputHandler.js</code> looks like after doing so</p>
+          <script src="https://gist.github.com/kalegd/5a3140e1a9a1af42cb57479efdd4cff1.js"></script>
+          <p>Now let's make it so that the spaceship can move forward, backwards, left, and right using WASD controls. We can do this by updating the <code>update(timeDelta)</code> function in <code>Spaceship.js</code> with calls to our new <code>isKeyPressed(code)</code> function. Here's what that can look like</p>
+          <script src="https://gist.github.com/kalegd/e3c4d16ad287d292d1f2c8fd9ecc3f19.js"></script>
+          <p>Running our website now gives us a spaceship we can control in 4 directions, awesome!</p>
+          <h3>Step 2</h3>
+          <p>Depending on which web browser you used for the last portion, you may or may not have noticed a tiny little bug. For chromium based browsers, hitting ESC to unlock the pointer also clears all keyboard information. This means if you're holding W to move forward, hit ESC, and then release W, the browser won't trigger a <code>keyup</code> event so by hitting the start button afterwards you'll keep moving forward even though you're not pressing anything</p>
+          <p>This is a little annoying, and the only solution I can come up with that doesn't make me hate myself is just clearing all keys in our Set <code>_keysPressed</code>. This does mean that if you keep holding W while you press ESC and then hit the start button you'll no longer be moving, but it's better for the user to have to repress the key to start moving than for them to repress and release the key to stop moving</p>
+          <p>There's no reason for all Desktop / Laptop users suffer for the sins of Chrome, so let's open up <code>setup.js</code> and store whether we're using a Chromium based browser using</p>
+          <script src="https://gist.github.com/kalegd/cc8db2c85bdd0456969461dd34661744.js"></script>
+          <p>Great, now we can just add a little check to see if we're using a chromium based browser with our other event listeners in <code>InputHandler.js</code>, and if so add a <code>pointerlockchange</code> event listener that will clear <code>_keysPressed</code> depending on <code>global.sessionActive</code></p>
+          <script src="https://gist.github.com/kalegd/63ea6037a67c0c227db0b28f96c77f8c.js"></script>
+          <p class="text-center"><em>Don't forget to import global!</em></p>
+          <p>Dope, now everything works in a much more reasonable manner for Chrome users</p>
+          <p>Hope you enjoyed this tutorial and are excited for the next one because this time I saved the best for last, VR Controller Input!</p>
+          <p><a target="_blank" href="https://kalegd.github.io/tutorials/user_inputs_part_2">Finished code in action</a></p>
+          <p><a target="_blank" href="https://github.com/kalegd/user_inputs_part_2">Git Repository</a></p>
+          <h3>Glossary</h3>
+          <ul>
+            <li><em>Set</em> &ndash; A data structure implemented in Javascript as a Hash Set thereby giving it a O(1) time complexity for retrieval</li>
+          </ul>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <p><a href="/tutorials/user-inputs-part-3">Continue on to Part 3 &ndash; VR Controllers</a></p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

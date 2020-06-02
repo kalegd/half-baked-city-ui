@@ -1,0 +1,114 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <title>WebXR Tutorials - User Inputs Part 1</title>
+    <meta name="description" content="Learn how to accept input from touch screens in your WebXR Websites with this tutorial">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="5e5c3fa4-c642-493d-9cce-95bfff28ac2d">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="tutorial-title text-center">User Inputs Part 1 &ndash; Touch Screens</h2>
+          <p>This tutorial series will teach us how to listen for user input via:<p>
+          <ol>
+            <li>Touch Screens</li>
+            <li><a href="/tutorials/user-inputs-part-2">Keyboards</a></li>
+            <li><a href="/tutorials/user-inputs-part-3">VR Controllers</a></li>
+          </ol>
+          <p>By the end of this tutorial series, we'll end up with a <a target="_blank" href="https://kalegd.github.io/tutorials/user_inputs_part_3">WebXR app demoing input detection by controlling a spaceship</a></p>
+          <h3>Step 1</h3>
+          <p>We'll use the finished code from the <a target="_blank" href="https://github.com/kalegd/gltf_assets_tutorial">glTF Assets Tutorial</a> as our starting point</p>
+          <p>Let's begin by creating a new file <code>/scripts/core/InputHandler.js</code> for handling all user input. I personally like polling for controller inputs, so let's keep that in mind when filling it out</p>
+          <p>Detecting whether a mobile screen is touched or not is quite simple so we'll start with that. All we need is a boolean <code>_screenTouched</code> that keeps track of when the user has touched the screen. We can use the <code>touchstart</code> and <code>touchend</code> events to set it accordingly. Here's what we should end up</p>
+          <script src="https://gist.github.com/kalegd/fbd3a610efa62538cd39b031e7231a8f.js"></script>
+          <p>Now let's create an instance of it in <code>Main.js</code> underneath where we instantiate our <code>SessionHandler</code>. And instead of creating those handlers in the constructor let's move them into a seperate function called <code>_createHandlers()</code> that looks like this</p>
+          <script src="https://gist.github.com/kalegd/4fb0a24062cc409a4025be331d06054e.js"></script>
+          <p class="text-center"><em>Notice how we expose the Input Handler via global</em></p>
+          <p>Cool, let's make something happen now when the screen is touched to verify things are working properly. Since we have a planet and spaceship in front of us, let's make the spaceship fly towards the planet. Copy our code from <code>/scripts/components/GLTFAsset.js</code> to make <code>/scripts/components/Spaceship.js</code> as a start</p>
+          <p>We'll need to add a speed parameter to <code>Spaceship.js</code> and an update function that moves the Spaceship <em>forward</em> whenever the screen is touched. Here's what we get after those additions</p>
+          <blockquote>I use the following convention: forward = negative Z direction</blockquote>
+          <script src="https://gist.github.com/kalegd/998a20138ec95eec6b53597d17cb2acf.js"></script>
+          <p>Now we just need to import <code>Spaceship</code> into <code>Main.js</code> and use that when instantiating the spaceship. We'll also need to change it's scope using <code>this._spaceship = new Spaceship(...</code> so that we can call its <code>update(timeDelta)</code> function from the update function in <code>Main.js</code></p>
+          <p>Running it on our phones we see that the spaceship does move, but not in the intended direction. Rather than reorient the asset in code itself, let's open up a 3D modeling tool like <a target="_blank" href="https://www.blender.org/">Blender</a> to rotate the asset 90&#176; (if you don't want to venture into the realm of 3D modeling tools just yet, feel free to download the correctly oriented asset <a target="_blank" href="https://github.com/kalegd/user_inputs_part_1/blob/master/models/lowpoly_spaceship.glb">here</a>)</p>
+          <blockquote>To fix this we could have also just made forward the positive X direction, but then if we ever replaced this model with another that was oriented differently we'd get the same problem. There is an argument for using the positive Z direction so we could make use of Object3D's lookAt() function, but we'll find out in part 3 of this tutorial series that negative Z is best for WebXR</blockquote>
+
+          <p>After updating our glb file with the correctly oriented asset, we just need to update the initial rotation of our Spaceship along the y-axis so that it's facing the planet once more. Now the spaceship moves in the correct direction, nice job!</p>
+          <h3>Step 2</h3>
+          <p>There's a little bug in our program, can you find it? Right now if we touch our screen before hitting the start button the ship still moves. We probably don't want that behavior so we have two options</p>
+          <ol>
+            <li>In <code>Spaceship.js</code>, check to see if a session is active before moving the spaceship</li>
+            <li>In <code>InputHandler.js</code>, have <code>isScreenTouched()</code> return false if a session is not active</li>
+          </ol>
+          <p>Either option will work, but I don't like the idea of Input Handler being dependent on Session Handler so we'll go with the first option</p>
+          <p>To do this, open up <code>SessionHandler.js</code> and</p>
+          <ol>
+            <li>Declare <code>global.sessionActive = false;</code> in the constructor</li>
+            <li>Set <code>global.sessionActive</code> to true or false in the <code>lock</code>, <code>unlock</code>, and <code>touchend</code> events</li>
+            <li>Add <code>sessionstart</code> and <code>sessionend</code> event listeners to <code>renderer.xr</code> to update <code>global.sessionActive</code> accordingly</li>
+          </ol>
+          <p><code>SessionHandler.js</code> should now contain something like this</p>
+          <script src="https://gist.github.com/kalegd/692d313d10c1ae77fd9c4029910d7933.js"></script>
+          <p>Now we just check if <code>global.sessionActive</code> is true in the update function of <code>Spaceship.js</code> and everything works as it should!</p>
+          <p>I hope you're as excited to stop caring about mobile users for a while like I am, because this is hopefully the last tutorial dedicated to them for a long while</p>
+          <p><a target="_blank" href="https://kalegd.github.io/tutorials/user_inputs_part_1">Finished code in action</a></p>
+          <p><a target="_blank" href="https://github.com/kalegd/user_inputs_part_1">Git Repository</a></p>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <p><a href="/tutorials/user-inputs-part-2">Continue on to Part 2 &ndash; Keyboards</a></p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

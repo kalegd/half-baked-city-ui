@@ -15,6 +15,7 @@
     <script type="text/javascript" src="/js/components/navbar.js" defer></script>
     <script type="text/javascript" src="/js/page-scripts/account.js" defer></script>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script src="https://cdn.babylonjs.com/viewer/babylon.viewer.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <script>
       (adsbygoogle = window.adsbygoogle || []).push({
@@ -52,7 +53,7 @@
         </div>
         <div id="update-email-div" class="collapsible-content">
           <div class="collapsible-content-body">
-            <div class="account-row">
+            <div class="account-row text-center">
               <label>New Email Address</label>
               <input id="new-email-address-input" placeholder="Email Address">
             </div>
@@ -65,10 +66,31 @@
             </div>
           </div>
         </div>
-        <div class="account-row d-flex justify-content-between">
+        <div class="account-row flex-space-between">
           <div>Spotify: <span id="spotify-integration">...</span></div>
           <div><a id="spotify-connect-link" class="classic-link display-none" href="#">Connect</a></div>
         </div>
+        <div class="account-row flex-space-between">
+          <div>Avatar:</div>
+          <div><a class="classic-link collapsible collapsed" href="#update-avatar-div"><span>Update</span><span>Close</span></a></div>
+        </div>
+        <div id="update-avatar-div" class="collapsible-content">
+          <div class="collapsible-content-body">
+            <p class="text-center">Avatars can be .png, .jpg, or .glb files</p>
+            <div class="account-row text-center">
+              <label>New Avatar URL</label>
+              <input id="new-avatar-url-input" placeholder="https://s3.amazonaws.com/readyplayerbaker/...">
+            </div>
+            <p id="new-avatar-url-processing" class="processing">Please Wait...</p>
+            <p id="new-avatar-url-error-invalid" class="error">Invalid URL</p>
+            <p id="new-avatar-url-error" class="error">Server error, please try again later</p>
+            <div class="account-row text-center">
+              <a id="new-avatar-url-submit" href="#" class="color-change-button">Update</a>
+              <a id="use-default-avatar-submit" href="#" class="color-change-button">Use Default</a>
+            </div>
+          </div>
+        </div>
+        <div id="avatar">...</div>
       </div>
     </div>
     <footer>

@@ -1,0 +1,121 @@
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156915208-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-156915208-1');
+    </script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/tutorial.css">
+    <script type="text/javascript" src="/js/constants.js" defer></script>
+    <script type="text/javascript" src="/js/components/navbar.js" defer></script>
+    <script type="text/javascript" src="/js/page-scripts/tutorial.js" defer></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <script>
+      (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "ca-pub-7948249771393856",
+        enable_page_level_ads: true
+      });
+    </script>
+    <title>WebXR Tutorials - User Inputs Part 3</title>
+    <meta name="description" content="Learn how to accept input from VR Controllers in your WebXR Websites with this tutorial">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="id" content="5e5c3fa4-c642-493d-9cce-95bfff28ac2d">
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <div class="header-stripe"></div>
+      </div>
+      <div>
+        <a class="header-link" href="/">
+            <img src="/images/potato-logo.png" alt="Potato Logo">
+            <span>Half Baked City</span>
+            <img src="/images/potato-logo.png" alt="Potato Logo" class="mirror">
+        </a>
+      </div>
+    </div>
+    <div class="container">
+      <p id="navbar" class="navbar"><a href="/apps">Apps</a>|<a href="/tutorials">Tutorials</a>|<a href="/about">About</a>|</p>
+      <div class="large-card tutorial-card">
+        <div class="tutorial">
+          <h2 class="tutorial-title text-center">User Inputs Part 3 &ndash; VR Controllers</h2>
+          <p class="text-center">Time to start touching the WebXR API a little more closely</p>
+          <h3>Step 1</h3>
+          <p>In this tutorial, we'll be extending <a target="_blank" href="https://github.com/kalegd/user_inputs_part_2">our code from Part 2</a> to listen for user input via VR Controllers</p>
+          <p>Our VR Controllers provide more than just gamepad information, they also provide the controller's position and rotation. You can find the controllers by first accessing the <a href="https://www.w3.org/TR/webxr/#session">XR Session</a> via <code>renderer.xr.getSession()</code> and then looking at its input sources</p>
+          <p>I recommend taking some time to read through the WebXR API if you want a better understanding of how to access important XR information, but it won't be necessary for this tutorial given how I spoon feed everything to you</p>
+          <blockquote>three.js also provides a way to keep track of controllers based on an index, but this leads to a weird situation. Say we determine that index 0 gives us the right hand controller and index 1 gives us the left controller. If the battery of our right controller dies, index 0 will then give us the left controller. So we'd have to constantly be checking which index is mapped to what controller which I don't like. I'd rather write my own solution based off of the code they have, but just keeping track of the left controller and right controller as that's all I care about</blockquote>
+          <p>Let's start by only worrying about the gamepad information of the controllers. Controllers can be accessed via the <code>inputSources</code> attribute of our XR Session, and we can also be notified if new ones get added or old ones get deleted from the session's <code>inputsourcechange</code> event</p>
+          <p>So in <code>InputHandler</code> we should:</p>
+          <ol>
+            <li>Accept <code>renderer</code> as a parameter in the constructor</li>
+            <li>Declare <code>this._leftXRInputSource</code> and <code>this._rightXRInputSource</code> in the constructor</li>
+            <li>Store controller information on <code>sessionstart</code> events</li>
+            <li>Clear controller information on <code>sessionend</code> events</li>
+            <li>Keep track of controller changes based off of the XR Sessions <code>inputsourcechange</code> event</li>
+            <li>Have a function <code>getXRGamepad(hand)</code> that returns the correct input source's gamepad based off of the <code>hand</code> parameter</li>
+          </ol>
+          <p>Doing all of those things gives us our updated <code>InputHandler.js</code> below</p>
+          <script src="https://gist.github.com/kalegd/4a05d283ca1a432a05ca2f71a2abc585.js"></script>
+          <p class="text-center"><em>Make sure to pass the renderer in when creating <code>InputHandler</code> in <code>Main.js</code></em></p>
+          <p>Great, now we can add some code to test it in our <code>Spaceship.js</code>. Let's make the spaceship move forward when the main trigger of our right hand is pressed down. The <a href="https://www.w3.org/TR/webxr-gamepads-module-1/#xr-standard-gamepad-mapping">xr-standard mapping for gamepads</a> have the primary trigger mapped to the button at index 0. Let's once again alter the conditional for moving forward in the <code>update(timeDelta)</code> function of <code>Spaceship.js</code> to also use the gamepad like so</p>
+          <script src="https://gist.github.com/kalegd/7f689bf6eb6b72a609d407379cfa6ebd.js"></script>
+          <p>Running this on our VR Headset we see that the ship moves based on our right trigger without a problem. Awesome!</p>
+          <h3>Step 2</h3>
+          <p>Now we need to handle tracking the position and orientation details of our controllers. If you skimmed over the WebXR API Documentation you may have noticed that there is both a target ray space and a grip space for the controllers. The target ray space is oriented so that forward is in the direction of where the controller's selection line, "target ray", extends to. The grip space is oriented so that forward is in the direction of the thumb-ish. If you imagine holding a sword upright in place of the controller, forward is up</p>
+          <blockquote>Remember when I say forward I mean the local negative Z direction</blockquote>
+          <p>The <code>WebXRManager</code> section of three.js has code to handle tracking controller position and orientation which we'll base our solution off of</p>
+          <p>We'll need:</p>
+          <ol>
+            <li>Object3Ds to represent the grip space and target ray space in both the left and right hands</li>
+            <li>To add the relevant hand's target ray space and grip space Object3Ds to the scene when that hand's controller becomes available</li>
+            <li>To remove the relevant hand's target ray space and grip space Object3Ds from the scene when that hand's controller becomes unavailable</li>
+            <li>An <code>update(frame)</code> function that updates the Object3Ds of both right and left controllers if possible</li>
+            <li>A function <code>getXRController(hand, type)</code> that returns the appropriate Object3D representation of the controller</li>
+          </ol>
+          <p>Based off of these needs and how controller tracking data is updated in three.js, we get these updates to <code>InputHandler.js</code></p>
+          <script src="https://gist.github.com/kalegd/df8ddcc42492857997b5e633f6a47aa1.js"></script>
+          <p class="text-center"><em>Notice how we now accept controllerParent in the constructor!</em></p>
+          <p>If any of this feels a little bit confusing, again I recommend reading through the WebXR API to get a butter understanding of what's happening. If you're still confused after that, feel free to drop a comment</p>
+          <p>Now we need to call the update function in <code>InputHandler</code> whenever we're using an XR Device. Rather than have a conditional in our animation loop (including InputHandler), let's change our animation loop slightly depending on our device type. While we're at it we can also make it so our <code>SessionHandler</code> is only updated if we're on a Mobile Device</p>
+          <blockquote>By moving the conditional to outside the animation loop, we remove the needless repetitive checking on every frame and just check the device type once on startup</blockquote>
+          <p>Here's how we can do that at the bottom of our constructor in <code>Main.js</code></p>
+          <script src="https://gist.github.com/kalegd/6493951f2900a9a95272e0f7de456196.js"></script>
+          <p>Great, now <code>InputHandler</code> keeps track of the position and orientation of VR Controllers too and is fully functional. All that's left to do is to set our Spaceship's orientation to match the right controller's orientation in the <code>update(timeDelta)</code> function like this</p>
+          <script src="https://gist.github.com/kalegd/7b89ac3bba3a562b2bcbb5f5ed656c40.js"></script>
+          <p>And it works! Phew this was a lot of code and a quite a bit of work. But we've set up a good foundation for handling any sort of User Input in the future (except for mouse clicks, but that should be easy for you to figure out after this &#128521;)
+          <p><a target="_blank" href="https://kalegd.github.io/tutorials/user_inputs_part_3">Finished code in action</a></p>
+          <p><a target="_blank" href="https://github.com/kalegd/user_inputs_part_3">Git Repository</a></p>
+          <h3>Glossary</h3>
+          <ul>
+            <li><em>Set</em> &ndash; A data structure implemented in Javascript as a Hash Set thereby giving it a O(1) time complexity for retrieval</li>
+          </ul>
+          <p>Feeling generous/want to support me in writing tutorials? Then <a target="_blank" href="https://www.buymeacoffee.com/kalegd"><strong>buy me a coffee</strong></a>, which I'll probably use for boba or almonds (raw and unsalted you heathens) because I don't like coffee</p>
+          <div class="comments-section text-center">
+            <textarea id="new-comment" class="new-comment-box" maxlength="10000" rows="4" placeholder="Write a comment..."></textarea>
+            <p class="text-right">
+              <a href="#" id="comment-button" class="comment-button">Comment</a>
+            </p>
+            <p id="comment-processing" class="processing">Please Wait...</p>
+            <p id="comment-error-authenticate" class="error"><a class="classic-link" href="/authenticate">Log in/Sign up</a> to comment</p>
+            <p id="comment-error" class="error">Server error, please try again later</p>
+            <div id="comments-div" class="comments-div">
+              <p>...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="text-center">
+        City Under Construction
+      </div>
+    </footer>
+  </body>
+</html>

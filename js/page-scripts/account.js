@@ -6,6 +6,12 @@ if(jwt == null || user == null) {
 user = JSON.parse(user);
 $("#username").text(user.username);
 $("#email-address").text(user.emailAddress);
+let avatarURL = user.avatarURL;
+if(/\.png$|\.jpg$|\.jpeg$/.test(user.avatarURL)) {
+    $("#avatar").html('<image src="' + user.avatarURL + '" width=100>');
+} else if(/\.glb$/.test(user.avatarURL)) {
+    $("#avatar").html('<babylon model="' + user.avatarURL + '"></babylon>');
+}
 
 //For full list of scopes, see here: https://developer.spotify.com/documentation/general/guides/scopes/
 if(user.spotify == null) {
@@ -63,7 +69,50 @@ $("#new-email-address-submit").click(function(e) {
     });
 });
 
+$("#new-avatar-url-submit").click(function(e) {
+    e.preventDefault();
+    let request = {
+        'avatarURL': $('#new-avatar-url-input').val(),
+    };
+    $("#new-avatar-url-error").removeClass("show");
+    $("#new-avatar-url-error-invalid").removeClass("show");
+    if(!validateAvatarURL(request.avatarURL)) {
+        $("#new-avatar-url-error-invalid").addClass("show");
+        return;
+    }
+    $("#new-avatar-url-processing").addClass("show");
+    $.ajax({
+        url: API_URL + '/user/avatar-url',
+        data: JSON.stringify(request),
+        type: 'PUT',
+        contentType: 'application/json',
+        dataType: 'json',
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("Authorization", jwt);
+        },
+        success: function(response) {
+            $("#new-avatar-url-processing").removeClass("show");
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            window.location.reload();
+        },
+        error: function(xhr, status, error) {
+            let response = xhr.responseJSON;
+            $("#new-avatar-url-processing").removeClass("show");
+            $("#new-avatar-url-error").addClass("show");
+        }
+    });
+});
+
+$("#use-default-avatar-submit").click(function(e) {
+    $('#new-avatar-url-input').val('/images/potato-logo.png');
+    $('#new-avatar-url-submit').click();
+});
+
 function validateEmail(email) {
   var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
+}
+
+function validateAvatarURL(url) {
+    return /\.png$|\.jpg$|\.jpeg$|\.glb$/.test(url);
 }
