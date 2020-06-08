@@ -447,8 +447,8 @@ export default class MusicVisualizerMenu {
 
     _isTriggerInputPressed() {
         if(global.deviceType == "XR") {
-            let controller = global.inputHandler.getXRInputSource(this._activeHand);
-            return controller != null && controller.gamepad.buttons[0].pressed;
+            let gamepad = global.inputHandler.getXRGamepad(this._activeHand);
+            return gamepad != null && gamepad.buttons[0].pressed;
         } else if(global.deviceType == "POINTER") {
             return global.inputHandler.isKeyPressed("Space");
         } else if(global.deviceType == "MOBILE") {

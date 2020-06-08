@@ -152,8 +152,8 @@ export default class BulletBlaster {
 
     _isTriggerInputPressed() {
         if(global.deviceType == "XR") {
-            let controller = global.inputHandler.getXRInputSource("RIGHT");
-            return controller != null && controller.gamepad.buttons[0].pressed;
+            let gamepad = global.inputHandler.getXRGamepad("RIGHT");
+            return gamepad != null && gamepad.buttons[0].pressed;
         } else if(global.deviceType == "POINTER") {
             return global.inputHandler.isKeyPressed("Space");
         } else if(global.deviceType == "MOBILE") {

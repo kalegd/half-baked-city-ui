@@ -189,8 +189,8 @@ export default class DartGun {
 
     _isTriggerInputPressed() {
         if(global.deviceType == "XR") {
-            let controller = global.inputHandler.getXRInputSource(this._shootingHand);
-            return controller != null && controller.gamepad.buttons[0].pressed;
+            let gamepad = global.inputHandler.getXRGamepad(this._shootingHand);
+            return gamepad != null && gamepad.buttons[0].pressed;
         } else if(global.deviceType == "POINTER") {
             return global.inputHandler.isKeyPressed("Space");
         } else if(global.deviceType == "MOBILE") {
