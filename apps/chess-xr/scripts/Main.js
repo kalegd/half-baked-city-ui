@@ -235,7 +235,7 @@ export default class Main {
                         this._dynamicAssets[i].wakeUp();
                     }
                 }
-            }, 500);
+            }, 2000);
         } else {
             $(this._loadingMessage).html("<h2>Loading "
                 + global.loadingAssets.size + " more asset(s)</h2>");

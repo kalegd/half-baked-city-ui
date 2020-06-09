@@ -298,6 +298,12 @@ export default class ChessGameUI {
             'height': 0.2,
             'width': 0.5,
         });
+        let resetButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': 'Reset',
+            'ontrigger': () => {
+                global.chessXR.reset();
+            },
+        });
         let backButton = ThreeMeshUIHelper.createButtonBlock({
             'text': 'Back',
             'ontrigger': () => {
@@ -380,8 +386,10 @@ export default class ChessGameUI {
         container.add(backButton);
         container.add(heightBlock);
         container.add(sizeBlock);
+        container.add(resetButton);
         container.set({ fontFamily: this._fontFamily, fontTexture: this._fontTexture });
         this._interactables['SETTINGS'].push(container);
+        this._interactables['SETTINGS'].push(resetButton);
         this._interactables['SETTINGS'].push(backButton);
         this._interactables['SETTINGS'].push(heightUpButton);
         this._interactables['SETTINGS'].push(heightDownButton);

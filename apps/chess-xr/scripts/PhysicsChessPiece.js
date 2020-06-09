@@ -13,7 +13,12 @@ export default class PhysicsChessPiece {
         this._totalHeight = this._heights.reduce((a, b) => a + b, 0);
         this._radialSegments = params['Radial Segments'] 
             ? params['Radial Segments'] : 16;
-        this._position = (params['Position']) ? params['Position'] : [0,0,0];
+        this._position = (params['Position'])
+            ? Array.from(params['Position'])
+            : [0,0,0];
+        this._deadPosition = (params['Dead Position'])
+            ? Array.from(params['Dead Position'])
+            : [0,0,0];
         this._rotation = (params['Rotation']) ? params['Rotation'] : [0,0,0];
         this._mass = (params['Mass']) ? params['Mass'] : 1;
         this._scale = (params['Scale']) ? params['Scale'] : 1;
@@ -328,11 +333,46 @@ export default class PhysicsChessPiece {
         physicsModel.setKinematicTarget(transform);
     }
 
+    reset(useDeadPosition) {
+        this.beLetGoBy(this._pivotPoint.parent);
+        this.ownership = 0;
+        this.authority = 1;
+        if(useDeadPosition) {
+            this._pivotPoint.position.fromArray(this._deadPosition);
+        } else {
+            this._pivotPoint.position.fromArray(this._position);
+        }
+        this._pivotPoint.rotation.fromArray(this._rotation);
+        //this._updatePhysicsModelFromMesh(this._pivotPoint, this._physicsModel);
+        this._pivotPoint.getWorldPosition(this._worldPosition);
+        this._pivotPoint.getWorldQuaternion(this._worldQuaternion);
+        let transform = {
+            translation: {
+                x: this._worldPosition.x,
+                y: this._worldPosition.y,
+                z: this._worldPosition.z,
+            },
+            rotation: {
+                w: this._worldQuaternion.w, // PhysX uses WXYZ quaternions,
+                x: this._worldQuaternion.x,
+                y: this._worldQuaternion.y,
+                z: this._worldQuaternion.z,
+            },
+        };
+        this._physicsModel.setGlobalPose(transform, false);
+        this._physicsModel.setLinearVelocity({ x: 0, y: 0, z: 0 }, false);
+        this._physicsModel.setAngularVelocity({ x: 0, y: 0, z: 0 }, false);
+    }
+
     update(timeDelta) {
         if(this._isHeld) {
             this._updatePhysicsModelFromMesh(this._pivotPoint, this._physicsModel);
         } else {
-            this._updateMeshFromPhysicsModel(this._pivotPoint, this._physicsModel);
+            if(this._pivotPoint.position.y < -100) {
+                this.reset(true);
+            } else {
+                this._updateMeshFromPhysicsModel(this._pivotPoint, this._physicsModel);
+            }
         }
     }
 

@@ -35,6 +35,11 @@ export default class PhysicsChessSet {
                 pieceHeight,
                 this._boardLength / 4,
             ],
+            "Dead Position": [
+                this._boardLength * 9 / 20,
+                pieceHeight,
+                -this._boardLength * 7 / 20,
+            ],
             "Rotation": [0,0,0],
             "Radial Segments": 8,
             "Mass": 40,
@@ -50,6 +55,11 @@ export default class PhysicsChessSet {
                 -this._boardLength * 7 / 20,
                 pieceHeight,
                 this._boardLength * 7 / 20,
+            ],
+            "Dead Position": [
+                -this._boardLength * 7 / 20,
+                pieceHeight,
+                -this._boardLength * 9 / 20,
             ],
             "Rotation": [0,0,0],
             "Radial Segments": 8,
@@ -67,6 +77,11 @@ export default class PhysicsChessSet {
                 pieceHeight,
                 this._boardLength * 7 / 20,
             ],
+            "Dead Position": [
+                -this._boardLength / 4,
+                pieceHeight,
+                -this._boardLength * 9 / 20,
+            ],
             "Rotation": [0,0,0],
             "Radial Segments": 8,
             "Mass": 40,
@@ -82,6 +97,11 @@ export default class PhysicsChessSet {
                 -this._boardLength * 3 / 20,
                 pieceHeight,
                 this._boardLength * 7 / 20,
+            ],
+            "Dead Position": [
+                -this._boardLength * 3 / 20,
+                pieceHeight,
+                -this._boardLength * 9 / 20,
             ],
             "Rotation": [0,0,0],
             "Radial Segments": 8,
@@ -99,6 +119,11 @@ export default class PhysicsChessSet {
                 pieceHeight,
                 this._boardLength * 7 / 20,
             ],
+            "Dead Position": [
+                -this._boardLength / 20,
+                pieceHeight,
+                -this._boardLength * 9 / 20,
+            ],
             "Rotation": [0,Math.PI/2,0],
             "Radial Segments": 8,
             "Mass": 40,
@@ -115,6 +140,11 @@ export default class PhysicsChessSet {
                 pieceHeight,
                 this._boardLength * 7 / 20,
             ],
+            "Dead Position": [
+                this._boardLength / 20,
+                pieceHeight,
+                -this._boardLength * 9 / 20,
+            ],
             "Rotation": [0,0,0],
             "Radial Segments": 8,
             "Mass": 40,
@@ -126,11 +156,14 @@ export default class PhysicsChessSet {
             let pawn = this._addWithRotation(pawnParams);
             this._pieces.push(pawn);
             pawnParams['Position'][0] += this._boardLength / 10;
+            pawnParams['Dead Position'][2] += this._boardLength / 10;
         }
         pawnParams['Color'] = 0xdddddd;
         pawnParams['Position'][2] -= this._boardLength / 2;
+        pawnParams['Dead Position'][0] -= this._boardLength * 18 / 20;
         for(let i = 0; i < 8; i++) {
             pawnParams['Position'][0] -= this._boardLength / 10;
+            pawnParams['Dead Position'][2] -= this._boardLength / 10;
             //let pawn = new PhysicsChessPiece(pawnParams);
             let pawn = this._addWithRotation(pawnParams);
             this._pieces.push(pawn);
@@ -142,12 +175,17 @@ export default class PhysicsChessSet {
         this._addRoyalty(queenParams);
     }
 
+    _setPositionWithQuaternion(fieldName, quaternion) {
+
+    }
+
     //Set local position, then rotate with board, then translate with board
     _addWithRotation(params) {
         let scale = new THREE.Vector3(1,1,1);
         let vec3 = new THREE.Vector3();
         let euler = new THREE.Euler();
         let quaternion = new THREE.Quaternion();
+        let quaternion2 = new THREE.Quaternion();
         let matrix4 = new THREE.Matrix4();
         let parentMatrix4 = new THREE.Matrix4();
 
@@ -157,10 +195,12 @@ export default class PhysicsChessSet {
         parentMatrix4.compose(vec3, quaternion, scale);
 
         let oldPosition = params['Position'];
+        let oldDeadPosition = params['Dead Position'];
         let oldRotation = params['Rotation'];
         vec3.fromArray(oldPosition);
         euler.fromArray(oldRotation);
         quaternion.setFromEuler(euler);
+        quaternion2.setFromEuler(euler);
         matrix4.compose(vec3, quaternion, scale);
 
         matrix4.premultiply(parentMatrix4);
@@ -172,9 +212,20 @@ export default class PhysicsChessSet {
         params['Position'][0] += this._position[0];
         params['Position'][1] += this._position[1];
         params['Position'][2] += this._position[2];
+
+        vec3.fromArray(oldDeadPosition);
+        matrix4.compose(vec3, quaternion2, scale);
+        matrix4.premultiply(parentMatrix4);
+        matrix4.decompose(vec3, quaternion2, scale);
+        
+        params['Dead Position'] = vec3.toArray();
+        params['Dead Position'][0] += this._position[0];
+        params['Dead Position'][1] += this._position[1];
+        params['Dead Position'][2] += this._position[2];
         let piece = new PhysicsChessPiece(params);
         params['Rotation'] = oldRotation;
         params['Position'] = oldPosition;
+        params['Dead Position'] = oldDeadPosition;
         return piece;
     }
 
@@ -183,16 +234,19 @@ export default class PhysicsChessSet {
         let piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][0] *= -1;
+        params['Dead Position'][0] *= -1;
         //piece = new PhysicsChessPiece(params);
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][2] -= this._boardLength * 14 / 20;
+        params['Dead Position'][2] += this._boardLength * 18 / 20;
         params['Rotation'][1] = Math.PI;
         params['Color'] = 0xdddddd;
         //piece = new PhysicsChessPiece(params);
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][0] *= -1;
+        params['Dead Position'][0] *= -1;
         //piece = new PhysicsChessPiece(params);
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
@@ -203,6 +257,7 @@ export default class PhysicsChessSet {
         let piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][2] -= this._boardLength * 14 / 20;
+        params['Dead Position'][2] += this._boardLength * 18 / 20;
         params['Color'] = 0xdddddd;
         //piece = new PhysicsChessPiece(params);
         piece = this._addWithRotation(params);

@@ -123,7 +123,12 @@ export default class ChessXRController {
         } else if(actor2.type == "PHYSICS_CHESS_PIECE") {
             actor2.processCollisionWithHand(actor1);
         }
+    }
 
+    reset() {
+        for(let i = 0; i < 32; i++) {
+            this._chessPieces[i].reset();
+        }
     }
 
     //Indices for primary stream data goes as follows
