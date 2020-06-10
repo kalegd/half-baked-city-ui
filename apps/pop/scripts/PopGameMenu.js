@@ -1,6 +1,6 @@
 import global from '/library/scripts/core/global.js';
 import {insertWrappedTextToCanvas} from '/library/scripts/core/utils.module.js';
-import * as THREE from '/scripts/three/build/three.module.js';
+import * as THREE from '/library/scripts/three/build/three.module.js';
 
 export default class PopGameMenu {
     constructor(params) {

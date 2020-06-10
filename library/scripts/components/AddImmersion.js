@@ -2,8 +2,6 @@ import global from '/library/scripts/core/global.js';
 
 export default class AddImmersion {
     constructor(params) {
-        this._apiUrl = "https://oh9m8to7dl.execute-api.us-east-1.amazonaws.com/development";
-        //this._apiUrl = "https://ppigk7wzo3.execute-api.us-east-1.amazonaws.com/production";
         let pageId = $('meta[name=id]').attr("content");
         if(pageId) {
             this._addImmersion(pageId);
@@ -12,7 +10,7 @@ export default class AddImmersion {
 
     _addImmersion(pageId) {
         $.ajax({
-            url: this._apiUrl + '/app/' + pageId + "/immersion",
+            url: API_URL + '/app/' + pageId + "/immersion",
             type: 'POST',
             dataType: 'json',
             success: function(response) {

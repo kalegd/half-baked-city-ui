@@ -31,7 +31,7 @@ export default class ChessRTC {
     }
 
     _setupWebSocket() {
-        this._webSocket = new WebSocket("wss://j9lqbcgscd.execute-api.us-east-1.amazonaws.com/development");
+        this._webSocket = new WebSocket(WEBSOCKET_URL);
         this._webSocket.onopen = () => {
             console.log("We opened a connection!");
             if(this._socketConnectedCallback) {
