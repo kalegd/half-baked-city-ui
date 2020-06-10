@@ -10,7 +10,7 @@ export default class OpoonentAvatar {
         }
         this._defaultURL = (params['Default URL'])
             ? params['Default URL']
-            : './images/potato-logo.png';
+            : '/images/potato-logo.png';
         this._worldEuler = new THREE.Euler();
         this._vector3 = new THREE.Vector3();
 
@@ -22,7 +22,6 @@ export default class OpoonentAvatar {
     }
 
     _createMesh(filename) {
-        console.log(filename);
         if(/\.glb$/.test(filename)) {
             let gltfLoader = new GLTFLoader();
             gltfLoader.load(filename, (gltf) => {

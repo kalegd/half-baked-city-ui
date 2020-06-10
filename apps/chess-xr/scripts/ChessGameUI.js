@@ -103,20 +103,20 @@ export default class ChessGameUI {
         let randomMatchButton = ThreeMeshUIHelper.createButtonBlock({
             'text': 'Play Random Opponent',
             'ontrigger': () => {
-                //if(global.deviceType == "XR") {
+                if(global.deviceType == "XR") {
                     this.setScreen('PLEASE_WAIT');
                     global.chessXR.playRandomOpponent();
-                //} else {
-                //    this.setScreen('VR_ONLY');
-                //}
+                } else {
+                    this.setScreen('VR_ONLY');
+                }
             },
         });
-        let roomButton = ThreeMeshUIHelper.createButtonBlock({
-            'text': 'Host/Join Game',
-            'ontrigger': () => {
-                this.setScreen('HOST_OR_JOIN');
-            },
-        });
+        //let roomButton = ThreeMeshUIHelper.createButtonBlock({
+        //    'text': 'Host/Join Game',
+        //    'ontrigger': () => {
+        //        this.setScreen('HOST_OR_JOIN');
+        //    },
+        //});
         let settingsButton = ThreeMeshUIHelper.createButtonBlock({
             'text': 'Settings',
             'ontrigger': () => {
@@ -125,12 +125,12 @@ export default class ChessGameUI {
         });
         container.add(textBlock);
         container.add(randomMatchButton);
-        container.add(roomButton);
+        //container.add(roomButton);
         container.add(settingsButton);
         container.set({ fontFamily: this._fontFamily, fontTexture: this._fontTexture });
         this._interactables['MAIN'].push(container);
         this._interactables['MAIN'].push(randomMatchButton);
-        this._interactables['MAIN'].push(roomButton);
+        //this._interactables['MAIN'].push(roomButton);
         this._interactables['MAIN'].push(settingsButton);
         return container;
     }
@@ -454,11 +454,11 @@ export default class ChessGameUI {
 
     updateOpponentName() {
         let opponentName = (global.chessXR.opponentName) ? global.chessXR.opponentName : "...";
-        let textComponent = this._opponentNameBlock.children[0];
+        let textComponent = this._opponentNameBlock.children[1];
         textComponent.set({
             content: 'You are playing ' + opponentName,
         });
-        textComponent = this._opponentLeftBlock.children[0];
+        textComponent = this._opponentLeftBlock.children[1];
         textComponent.set({
             content: opponentName + ' has quit or lost connection',
         });

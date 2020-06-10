@@ -12,6 +12,7 @@ export default class PhysicsChessBoard {
         this._length = params['Length'];
         this._position = (params['Position']) ? params['Position'] : [0,0,0];
         this._rotation = (params['Rotation']) ? params['Rotation'] : [0,0,0];
+        this._sideTablesEnabled = params['Side Tables Enabled'];
         this._canvas = document.createElement("canvas");
         this._createImages();
         this._createTexture();
@@ -126,13 +127,28 @@ export default class PhysicsChessBoard {
         this._mesh = new THREE.Mesh(geometry, material);
         this._mesh.castShadow = true;
         this._mesh.receiveShadow = true;
+
+        if(this._sideTablesEnabled) {
+            geometry = new THREE.BoxBufferGeometry(this._length/5,this._length/20,this._length * 0.8);
+            material = new THREE.MeshStandardMaterial({
+                color: 0x696969,
+                transparent: true,
+                opacity: 0.7,
+            });
+            this._leftSideTableMesh = new THREE.Mesh(geometry, material);
+            this._rightSideTableMesh = new THREE.Mesh(geometry, material);
+            this._leftSideTableMesh.translateX(-this._length * 0.75);
+            this._rightSideTableMesh.translateX(this._length * 0.75);
+            this._pivotPoint.add(this._leftSideTableMesh);
+            this._pivotPoint.add(this._rightSideTableMesh);
+        }
+
         this._pivotPoint.add(this._mesh);
         this._pivotPoint.position.fromArray(this._position);
         this._pivotPoint.rotation.fromArray(this._rotation);
     }
 
     _createPhysicsModel() {
-        let halfExtent = this._size / 2;
         let geometry = new global.PhysX.PxBoxGeometry(
             this._length / 2, this._length / 40, this._length / 2
         );
@@ -158,11 +174,54 @@ export default class PhysicsChessBoard {
         this._physicsModel = global.physics.createRigidStatic(transform);
         this._physicsModel.attachShape(shape);
         this._physicsModel.setId(this.id);
+        if(this._sideTablesEnabled) {
+            this._leftSideTablePhysicsModel
+                = this._createSideTablePhysicsModel(this._leftSideTableMesh);
+            this._rightSideTablePhysicsModel
+                = this._createSideTablePhysicsModel(this._rightSideTableMesh);
+        }
+    }
+
+    _createSideTablePhysicsModel(mesh) {
+        let position = mesh.position.clone();
+        position.applyEuler(this._pivotPoint.rotation);
+        position.add(this._pivotPoint.position);
+
+        let geometry = new global.PhysX.PxBoxGeometry(
+            this._length / 10, this._length / 40, this._length * 0.4
+        );
+        let material = global.physics.createMaterial(0.2, 0.2, 0.2)
+        let flags = new global.PhysX.PxShapeFlags(
+            global.PhysX.PxShapeFlag.eSCENE_QUERY_SHAPE.value |
+            global.PhysX.PxShapeFlag.eSIMULATION_SHAPE.value
+        );
+        let shape = global.physics.createShape(geometry, material, false, flags);
+        let transform = {
+            translation: {
+                x: position.x * global.physicsScale,
+                y: position.y * global.physicsScale,
+                z: position.z * global.physicsScale,
+            },
+            rotation: {
+                w: this._pivotPoint.quaternion.w,
+                x: this._pivotPoint.quaternion.x,
+                y: this._pivotPoint.quaternion.y,
+                z: this._pivotPoint.quaternion.z,
+            },
+        };
+        let physicsModel = global.physics.createRigidStatic(transform);
+        physicsModel.attachShape(shape);
+        physicsModel.setId(this.id);
+        return physicsModel;
     }
 
     addToScene(scene) {
         scene.add(this._pivotPoint);
         global.physicsScene.addActor(this._physicsModel, null);
+        if(this._sideTablesEnabled) {
+            global.physicsScene.addActor(this._leftSideTablePhysicsModel, null);
+            global.physicsScene.addActor(this._rightSideTablePhysicsModel, null);
+        }
     }
 
     _updateMeshFromPhysicsModel(mesh, physicsModel) {

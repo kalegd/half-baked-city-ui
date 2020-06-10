@@ -22,6 +22,7 @@ export default class PhysicsChessSet {
             "Length": this._boardLength,
             "Position": this._position,
             "Rotation": this._rotation,
+            "Side Tables Enabled": true,
         });
 
         let pieceHeight = this._boardLength / 10;
@@ -36,7 +37,7 @@ export default class PhysicsChessSet {
                 this._boardLength / 4,
             ],
             "Dead Position": [
-                this._boardLength * 9 / 20,
+                this._boardLength * 14 / 20,
                 pieceHeight,
                 -this._boardLength * 7 / 20,
             ],
@@ -57,9 +58,9 @@ export default class PhysicsChessSet {
                 this._boardLength * 7 / 20,
             ],
             "Dead Position": [
-                -this._boardLength * 7 / 20,
+                this._boardLength * 16 / 20,
                 pieceHeight,
-                -this._boardLength * 9 / 20,
+                -this._boardLength * 7 / 20,
             ],
             "Rotation": [0,0,0],
             "Radial Segments": 8,
@@ -78,9 +79,9 @@ export default class PhysicsChessSet {
                 this._boardLength * 7 / 20,
             ],
             "Dead Position": [
-                -this._boardLength / 4,
+                this._boardLength * 16 / 20,
                 pieceHeight,
-                -this._boardLength * 9 / 20,
+                -this._boardLength / 4,
             ],
             "Rotation": [0,0,0],
             "Radial Segments": 8,
@@ -99,9 +100,9 @@ export default class PhysicsChessSet {
                 this._boardLength * 7 / 20,
             ],
             "Dead Position": [
-                -this._boardLength * 3 / 20,
+                this._boardLength * 16 / 20,
                 pieceHeight,
-                -this._boardLength * 9 / 20,
+                -this._boardLength * 3 / 20,
             ],
             "Rotation": [0,0,0],
             "Radial Segments": 8,
@@ -120,9 +121,9 @@ export default class PhysicsChessSet {
                 this._boardLength * 7 / 20,
             ],
             "Dead Position": [
-                -this._boardLength / 20,
+                this._boardLength * 16 / 20,
                 pieceHeight,
-                -this._boardLength * 9 / 20,
+                -this._boardLength / 20,
             ],
             "Rotation": [0,Math.PI/2,0],
             "Radial Segments": 8,
@@ -141,9 +142,9 @@ export default class PhysicsChessSet {
                 this._boardLength * 7 / 20,
             ],
             "Dead Position": [
-                this._boardLength / 20,
+                this._boardLength * 16 / 20,
                 pieceHeight,
-                -this._boardLength * 9 / 20,
+                this._boardLength / 20,
             ],
             "Rotation": [0,0,0],
             "Radial Segments": 8,
@@ -152,7 +153,6 @@ export default class PhysicsChessSet {
             "Scale": this._boardLength * 2,
         };
         for(let i = 0; i < 8; i++) {
-            //let pawn = new PhysicsChessPiece(pawnParams);
             let pawn = this._addWithRotation(pawnParams);
             this._pieces.push(pawn);
             pawnParams['Position'][0] += this._boardLength / 10;
@@ -160,11 +160,10 @@ export default class PhysicsChessSet {
         }
         pawnParams['Color'] = 0xdddddd;
         pawnParams['Position'][2] -= this._boardLength / 2;
-        pawnParams['Dead Position'][0] -= this._boardLength * 18 / 20;
+        pawnParams['Dead Position'][0] -= this._boardLength * 28 / 20;
         for(let i = 0; i < 8; i++) {
             pawnParams['Position'][0] -= this._boardLength / 10;
             pawnParams['Dead Position'][2] -= this._boardLength / 10;
-            //let pawn = new PhysicsChessPiece(pawnParams);
             let pawn = this._addWithRotation(pawnParams);
             this._pieces.push(pawn);
         }
@@ -230,36 +229,30 @@ export default class PhysicsChessSet {
     }
 
     _addDuos(params) {
-        //let piece = new PhysicsChessPiece(params);
         let piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][0] *= -1;
-        params['Dead Position'][0] *= -1;
-        //piece = new PhysicsChessPiece(params);
+        params['Dead Position'][2] *= -1;
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][2] -= this._boardLength * 14 / 20;
-        params['Dead Position'][2] += this._boardLength * 18 / 20;
+        params['Dead Position'][0] -= this._boardLength * 32 / 20;
         params['Rotation'][1] = Math.PI;
         params['Color'] = 0xdddddd;
-        //piece = new PhysicsChessPiece(params);
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][0] *= -1;
-        params['Dead Position'][0] *= -1;
-        //piece = new PhysicsChessPiece(params);
+        params['Dead Position'][2] *= -1;
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
     }
 
     _addRoyalty(params) {
-        //let piece = new PhysicsChessPiece(params);
         let piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][2] -= this._boardLength * 14 / 20;
-        params['Dead Position'][2] += this._boardLength * 18 / 20;
+        params['Dead Position'][0] -= this._boardLength * 32 / 20;
         params['Color'] = 0xdddddd;
-        //piece = new PhysicsChessPiece(params);
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
     }

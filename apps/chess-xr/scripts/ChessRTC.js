@@ -23,6 +23,7 @@ export default class ChessRTC {
         this._myAudio = document.createElement("audio");
         this._myAudio.autoplay = true;
         this._myAudio.defaultMuted = true;
+        this._myAudio.muted = true;
         this._peerAudio = document.createElement("audio");
         this._peerAudio.autoplay = true;
         document.body.appendChild(this._myAudio);
