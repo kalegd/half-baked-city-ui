@@ -28,7 +28,7 @@ export default class PhysicsChessSet {
         let pieceHeight = this._boardLength / 10;
         let pawnParams = {
             "Filename": "/library/models/chess_pawn.glb",
-            "Color": 0x222222,
+            "Color": 0x333333,
             "Radii": [0.015,0.015,0.005,0.009,0.01,0.008,0.003],
             "Heights": [0.012,0.027,0.0049,0.0049,0.0049,0.0049],
             "Position": [
@@ -49,7 +49,7 @@ export default class PhysicsChessSet {
         };
         let rookParams = {
             "Filename": "/library/models/chess_rook.glb",
-            "Color": 0x222222,
+            "Color": 0x333333,
             "Radii": [0.02,0.02,0.01,0.0134,0.0134],
             "Heights": [0.015,0.035,0.005,0.0146],
             "Position": [
@@ -70,7 +70,7 @@ export default class PhysicsChessSet {
         };
         let knightParams = {
             "Filename": "/library/models/chess_knight.glb",
-            "Color": 0x222222,
+            "Color": 0x333333,
             "Radii": [0.02,0.02,0.0145,0.019,0.0183,0.015,0.021,0.021,0.011,0.001],
             "Heights": [0.013,0.008,0.004,0.0075,0.0058,0.0165,0.008,0.0075,0.002],
             "Position": [
@@ -91,7 +91,7 @@ export default class PhysicsChessSet {
         };
         let bishopParams = {
             "Filename": "/library/models/chess_bishop.glb",
-            "Color": 0x222222,
+            "Color": 0x333333,
             "Radii": [0.02,0.02,0.0072,0.0105,0.0113,0.0078,0.003],
             "Heights": [0.015,0.046,0.007,0.007,0.007,0.0065],
             "Position": [
@@ -112,7 +112,7 @@ export default class PhysicsChessSet {
         };
         let kingParams = {
             "Filename": "/library/models/chess_king.glb",
-            "Color": 0x222222,
+            "Color": 0x333333,
             "Radii": [0.0225,0.0225,0.008,0.0127,0.008, 0.008],
             "Heights": [0.012,0.049,0.016,0.008,0.0126],
             "Position": [
@@ -133,7 +133,7 @@ export default class PhysicsChessSet {
         };
         let queenParams = {
             "Filename": "/library/models/chess_queen.glb",
-            "Color": 0x222222,
+            "Color": 0x333333,
             "Radii": [0.021,0.021,0.0078,0.0116,0.001],
             "Heights": [0.012,0.052,0.016,0.0095],
             "Position": [
@@ -158,7 +158,7 @@ export default class PhysicsChessSet {
             pawnParams['Position'][0] += this._boardLength / 10;
             pawnParams['Dead Position'][2] += this._boardLength / 10;
         }
-        pawnParams['Color'] = 0xdddddd;
+        pawnParams['Color'] = 0xcccccc;
         pawnParams['Position'][2] -= this._boardLength / 2;
         pawnParams['Dead Position'][0] -= this._boardLength * 28 / 20;
         for(let i = 0; i < 8; i++) {
@@ -238,7 +238,7 @@ export default class PhysicsChessSet {
         params['Position'][2] -= this._boardLength * 14 / 20;
         params['Dead Position'][0] -= this._boardLength * 32 / 20;
         params['Rotation'][1] = Math.PI;
-        params['Color'] = 0xdddddd;
+        params['Color'] = 0xcccccc;
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][0] *= -1;
@@ -252,7 +252,7 @@ export default class PhysicsChessSet {
         this._pieces.push(piece);
         params['Position'][2] -= this._boardLength * 14 / 20;
         params['Dead Position'][0] -= this._boardLength * 32 / 20;
-        params['Color'] = 0xdddddd;
+        params['Color'] = 0xcccccc;
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
     }
