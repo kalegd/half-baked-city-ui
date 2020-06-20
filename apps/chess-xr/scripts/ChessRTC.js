@@ -135,7 +135,7 @@ export default class ChessRTC {
         this._sendDataChannel = this._peerConnection.createDataChannel("sendChannel");
         this._sendDataChannel.onopen = (event) => {
             console.log(event);
-            this._sendDataChannel.send(global.chessXR.displayName + ":" + global.chessXR.avatarUrl);
+            this._sendDataChannel.send(global.chessXR.displayName + ":" + global.chessXR.avatarURL);
         };
         this._sendDataChannel.onclose = (event) => {
             console.log(event);
@@ -150,6 +150,8 @@ export default class ChessRTC {
                         global.chessXR.opponentLeft();
                         this._state = "LOCAL";
                         this._resetRTCAndPeerData();
+                    } else if(data == "R") {
+                        global.chessXR.resetPieces();
                     } else {
                         global.chessXR.setOpponentNameAndAvatar(data);
                     }
@@ -245,6 +247,17 @@ export default class ChessRTC {
             this._sendDataChannel.send(playerData);
         } catch(err) {
             //Do nothing...
+        }
+    }
+
+    sendResetSignal() {
+        if(this._state != "PLAYING") {
+            return;
+        }
+        try {
+            this._sendDataChannel.send("R");
+        } catch(error) {
+            //Do nothing... They'll hopefully try again
         }
     }
 

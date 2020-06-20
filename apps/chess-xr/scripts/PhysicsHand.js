@@ -339,6 +339,17 @@ export default class PhysicsHand {
         array[offset+5] = this._worldEuler.z;
     }
 
+    // Sets the data of the held object if it exists, otherwise -1 for the id
+    setArrayFromGraspData(array, offset) {
+        if(this._heldObject && this._heldObject._pivotPoint.parent == this._grasp) {
+            array[offset] = this._heldObject.id;
+            this._heldObject.setArrayFromPhysicsData(array, offset + 1);
+        } else {
+            array[offset] = -1;
+        }
+
+    }
+
     update(timeDelta) {
         this._updatePhysicsModelFromMesh(this._pivotPoint, this._physicsModel);
         this._animationMixer.update(timeDelta);

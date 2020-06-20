@@ -29,6 +29,13 @@ export default class OpoonentAvatar {
                 this._boundingBox.getCenter(this._vector3);
                 gltf.scene.position.sub(this._vector3);
                 gltf.scene.rotateY(Math.PI);
+                let hands = new Set();
+                gltf.scene.traverse((child) => {
+                    if(child.name.toLowerCase().includes("hand")) {
+                        hands.add(child);
+                    }
+                });
+                hands.forEach((hand) => { hand.parent.remove(hand); });
                 this._pivotPoint.add(gltf.scene);
                 this._dimensions = 3;
             }, () => {}, (error) => {

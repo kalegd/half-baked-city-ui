@@ -8,12 +8,13 @@ export default class ChessXRController {
     constructor() {
         this._frame = 0;
         this._lastPeerFrame = 0;
-        this._shortStream = Array(22).fill(0);
+        this._shortStream = Array(54).fill(0);
         this._longStream = Array(502).fill(0);
         this._chessPieces = [];
         this._peerConnected = false;
         this._opponentAvatar = new OpponentAvatar();
         this._vec3 = new THREE.Vector3();
+        this._vec3_2 = new THREE.Vector3();
         this._quaternion = new THREE.Quaternion();
         this._euler = new THREE.Euler();
         let user = localStorage.getItem('user');
@@ -66,7 +67,7 @@ export default class ChessXRController {
 
     setOpponentNameAndAvatar(nameAndAvatar) {
         let name = nameAndAvatar.substr(0, nameAndAvatar.indexOf(":"));
-        let avatarURL = nameAndAvatar.substr(0, nameAndAvatar.indexOf(":"));
+        let avatarURL = nameAndAvatar.substr(nameAndAvatar.indexOf(":") + 1);
         //this._opponentAvatar.updateURL('https://s3.amazonaws.com/readyplayerbaker/avatars_baked/953199c4-d244-4529-8feb-b2ed67a81099.glb');
         this._opponentAvatar.updateURL(avatarURL);
         this.opponentName = name;
@@ -97,12 +98,14 @@ export default class ChessXRController {
 
     _setArrayFromCameraData(array, offset) {
         //The first two lines give us problems after resizing
-        this._vec3.setFromMatrixPosition(global.camera.matrixWorld);
-        this._quaternion.setFromRotationMatrix(global.camera.matrixWorld);
-        this._quaternion.normalize();
+        //this._vec3.setFromMatrixPosition(global.camera.matrixWorld);
+        //this._quaternion.setFromRotationMatrix(global.camera.matrixWorld);
+        //this._quaternion.normalize();
         //These next two lines don't work for VR
         //global.camera.getWorldPosition(this._vec3);
         //global.camera.getWorldQuaternion(this._quaternion);
+        //This solution should work...
+        global.camera.matrixWorld.decompose(this._vec3,this._quaternion,this._vec3_2);
         this._euler.setFromQuaternion(this._quaternion);
 
         this._vec3.toArray(array, offset);
@@ -125,7 +128,14 @@ export default class ChessXRController {
         }
     }
 
+    // Resets all the chess pieces and then signal RTC Handler to send message
+    // if possible
     reset() {
+        this.resetPieces();
+        this._rtc.sendResetSignal();
+    }
+
+    resetPieces() {
         for(let i = 0; i < 32; i++) {
             this._chessPieces[i].reset();
         }
@@ -136,13 +146,15 @@ export default class ChessXRController {
     // 1     : user scale
     // 2     : left hand squeeze pressed
     // 3-18  : left hand matrix4
-    // 3-5  : left hand position
-    // 6-8  : left hand rotation
-    // 9    : right hand squeeze pressed
-    // 10-12  : right hand position
-    // 13-15  : right hand rotation
-    // 16-18  : camera position
-    // 19-21  : camera rotation
+    // 3-5   : left hand position
+    // 6-8   : left hand rotation
+    // 9     : right hand squeeze pressed
+    // 10-12 : right hand position
+    // 13-15 : right hand rotation
+    // 16-18 : camera position
+    // 19-21 : camera rotation
+    // 22-37 : left hand held chess piece
+    // 38-53 : right hand held chess piece
     _fillPrimaryStreamData(dataStream) {
         let leftGamepad = global.inputHandler.getXRGamepad("LEFT");
         let rightGamepad = global.inputHandler.getXRGamepad("RIGHT");
@@ -161,7 +173,14 @@ export default class ChessXRController {
         this._setArrayFromCameraData(dataStream, 16);
     }
 
-    _fillSecondaryStreamData(dataStream) {
+    // Held Chess Piece Data
+    _fillSecondaryShortStreamData(dataStream) {
+        this._leftHand.setArrayFromGraspData(dataStream, 22);
+        this._rightHand.setArrayFromGraspData(dataStream, 38);
+    }
+
+    // All chess piece data
+    _fillSecondaryLongStreamData(dataStream) {
         let offset = 22;
         for(let i = 0; i < 32; i++) {
             this._chessPieces[i].setArrayFromPhysicsData(dataStream, offset);
@@ -180,17 +199,6 @@ export default class ChessXRController {
         this._fillPrimaryStreamData(dataStream);
     }
 
-    //Indices for data goes as follows
-    // 0     : frame
-    // 1     : user scale
-    // 2     : left hand squeeze pressed
-    // 3-5  : left hand position
-    // 6-8  : left hand rotation
-    // 9    : right hand squeeze pressed
-    // 10-12  : right hand position
-    // 13-15  : right hand rotation
-    // 16-18  : camera position
-    // 19-21  : camera rotation
     update(timeDelta) {
         if(!this._peerConnected) {
             return;
@@ -200,14 +208,16 @@ export default class ChessXRController {
         this._rightPeerHand.update(timeDelta);
 
         let dataStream;
-        if(this._frame % 6 == 0) {
-            dataStream = this._longStream;
-            this._fillSecondaryStreamData(dataStream);
-        } else {
-            dataStream = this._shortStream;
-        }
         if(this._frame % 2 == 0) {
-            this._fillPrimaryStreamData(dataStream);
+            if(this._frame % 6 == 0) {
+                dataStream = this._longStream;
+                this._fillPrimaryStreamData(dataStream);
+                this._fillSecondaryLongStreamData(dataStream);
+            } else {
+                dataStream = this._shortStream;
+                this._fillPrimaryStreamData(dataStream);
+                this._fillSecondaryShortStreamData(dataStream);
+            }
             this._rtc.sendPlayerData(Float32Array.from(dataStream));
         }
     }
@@ -221,12 +231,19 @@ export default class ChessXRController {
         this._leftPeerHand.updateFromDataStream(data, 2);
         this._rightPeerHand.updateFromDataStream(data, 9);
         this._opponentAvatar.updateFromDataStream(data, 16);
-        if(data.length > 22) {
+        if(data.length > 54) {
             let offset = 22;
             for(let i = 0; i < 32; i++) {
                 //TODO: Send data to PhysicsChessPiece
                 this._chessPieces[i].updateFromDataStream(data, offset);
                 offset += 15;
+            }
+        } else {
+            if(data[22] != -1) {
+                global.physicsObjects[data[22]].updateFromDataStream(data, 23);
+            }
+            if(data[38] != -1) {
+                global.physicsObjects[data[38]].updateFromDataStream(data, 39);
             }
         }
     }

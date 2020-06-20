@@ -1,3 +1,4 @@
+import global from '/library/scripts/core/global.js';
 import * as THREE from '/library/scripts/three/build/three.module.js';
 import ThreeMeshUI from '/library/scripts/three-mesh-ui/three-mesh-ui.js';
 import ThreeMeshUIHelper from '/library/scripts/components/ThreeMeshUIHelper.js';
