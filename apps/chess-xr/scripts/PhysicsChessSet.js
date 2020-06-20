@@ -25,7 +25,7 @@ export default class PhysicsChessSet {
             "Side Tables Enabled": true,
         });
 
-        let pieceHeight = this._boardLength / 10;
+        let pieceHeight = this._boardLength / 40;
         let pawnParams = {
             "Filename": "/library/models/chess_pawn.glb",
             "Color": 0x333333,

@@ -25,6 +25,8 @@ export default class PhysicsChessPiece {
         this._centerOfMassHeightScale = (params['Center Of Mass Height Scale'])
             ? params['Center Of Mass Height Scale'] : 0.5;
         this._verticalOffset = this._totalHeight * this._centerOfMassHeightScale;
+        this._position[1] += this._verticalOffset * this._scale;
+        this._deadPosition[1] += this._verticalOffset * this._scale;
         this._scaleDiff = global.physicsScale / this._scale;
         this._hoveredBy = new Set();
         this.ownership = 0;
