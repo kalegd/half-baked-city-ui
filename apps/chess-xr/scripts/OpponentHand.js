@@ -203,8 +203,10 @@ export default class OpponentHand {
     }
 
     removeFromScene() {
-        this._pivotPoint.parent.remove(this._pivotPoint);
-        global.physicsScene.removeActor(this._physicsModel, null);
+        if(this._pivotPoint.parent) {
+            this._pivotPoint.parent.remove(this._pivotPoint);
+            global.physicsScene.removeActor(this._physicsModel, null);
+        }
     }
 
     wakeUp() {
@@ -224,20 +226,6 @@ export default class OpponentHand {
         } else {
             return null;
         }
-    }
-
-    _checkForAcquirableObject() {
-        let object = null;
-        let minimumDistance = 1000;
-        for(let i = 0; i < global.acquirableObjects.length; i++) {
-            let acquirableObject = global.acquirableObjects[i];
-            let v = acquirableObject.getDistanceTo(this._grasp);
-            if(v.acquirable && v.distance < minimumDistance) {
-                object = acquirableObject;
-                minimumDistance = v.distance;
-            }
-        }
-        return object;
     }
 
     _updateAnimation(name, forward) {
@@ -287,6 +275,9 @@ export default class OpponentHand {
     }
 
     updateFromDataStream(data, offset) {
+        if(!this._pivotPoint.parent) {
+            this.addToScene(global.scene);
+        }
         let scale = data[1];
         let squeezePressed = data[offset];
         if(this._opponentScale != scale) {

@@ -7,6 +7,8 @@ export default class PhysicsChessPiece {
     constructor(params) {
         this.id = getNextSequentialId();
         this.type = "PHYSICS_CHESS_PIECE";
+        this.chessPosition = params['Chess Position'];
+        this._originalChessPosition = params['Chess Position'];
         this._color = (params['Color']) ? params['Color'] : 0x222222;
         this._radii = params['Radii'];
         this._heights = params['Heights'];
@@ -31,6 +33,7 @@ export default class PhysicsChessPiece {
         this._hoveredBy = new Set();
         this.ownership = 0;
         this.authority = 1;
+        this.isAlive = true;
 
         this._worldPosition = new THREE.Vector3();
         this._worldQuaternion = new THREE.Quaternion();
@@ -65,9 +68,27 @@ export default class PhysicsChessPiece {
                     child.material = newMaterial;
                 }
             });
+            this._ogMesh = gltf.scene;
             this._pivotPoint.add(gltf.scene);
             //global.acquirableObjects.push(gltf.scene);
             global.acquirableObjects.push(this);
+        });
+    }
+
+    _replaceWith(filename) {
+        let gltfLoader = new GLTFLoader();
+        gltfLoader.load(filename, (gltf) => {
+            let newMaterial = new THREE.MeshStandardMaterial({color: this._color});
+            gltf.scene.translateY(-this._verticalOffset);
+            gltf.scene.traverse((child) => {
+                if(child.isMesh) {
+                    child.material = newMaterial;
+                }
+            });
+            this._promotedMesh = gltf.scene;
+            this._pivotPoint.remove(this._ogMesh);
+            this._pivotPoint.add(gltf.scene);
+            this._isPromoted = true;
         });
     }
 
@@ -171,8 +192,18 @@ export default class PhysicsChessPiece {
         this._physicsModel.wakeUp();
     }
 
+    setIsStrict(isStrict) {
+        if(isStrict) {
+            this._physicsModel.setRigidBodyFlag(global.PhysX.PxRigidBodyFlag.eKINEMATIC, true);
+            this._isKinematic = true;
+        } else {
+            this._physicsModel.setRigidBodyFlag(global.PhysX.PxRigidBodyFlag.eKINEMATIC, false);
+        }
+    }
+
     //Returns the distance of the object and if it's acquirable
-    getDistanceTo(object) {
+    //If strict game, use raycaster to see if piece is intersected
+    getDistanceTo(object, raycaster) {
         //TODO: Replace radius distance with checking for within Cylindrical Bounds
         let position;
         let position2 = new THREE.Vector3();
@@ -184,9 +215,28 @@ export default class PhysicsChessPiece {
         }
         object.getWorldPosition(position2);
         let distance = position.distanceTo(position2);
+
+        let acquirable;
+        if(global.deviceType == "XR") {
+            acquirable = distance < 0.25;
+        } else {
+            acquirable = true;
+        }
+        if(global.chessXR.isStrict) {
+            if(global.chessXR.turn == global.chessXR.color && this.isAlive && this.chessPosition in global.chessXR.moves) {
+                if(global.deviceType != "XR") {
+                    let intersections = raycaster.intersectObject(this._pivotPoint, true);
+                    acquirable = acquirable && intersections.length > 0;
+                } //Else we just let acquirable be whatever value it already is
+            } else {
+                acquirable = false;
+            }
+        } else {
+            acquirable = acquirable && (this.authority != 0 || this.ownership == global.chessXR.polite);
+        }
         return {
             "distance": distance,
-            "acquirable": distance < 0.25 && (this.authority != 0 || this.ownership == global.chessXR.polite),
+            "acquirable": acquirable,
         };
     }
 
@@ -194,10 +244,14 @@ export default class PhysicsChessPiece {
         if(this.authority != 0 || this.ownership == global.chessXR.polite) {
             object.attach(this._pivotPoint);
             this._isHeld = true;
-            this.authority = 0;
-            this.ownership = (global.chessXR.polite) ? 1 : 0;
-            //TODO: Set KINEMATIC flag
-            this._physicsModel.setRigidBodyFlag(global.PhysX.PxRigidBodyFlag.eKINEMATIC, true);
+            if(!global.chessXR.isStrict) {
+                this.authority = 0;
+                this.ownership = (global.chessXR.polite) ? 1 : 0;
+                this._physicsModel.setRigidBodyFlag(global.PhysX.PxRigidBodyFlag.eKINEMATIC, true);
+            } else {
+                this._movementTime = null;
+                this._promote = null;
+            }
         }
     }
 
@@ -212,8 +266,10 @@ export default class PhysicsChessPiece {
         if(this._pivotPoint.parent == object) {
             this._isHeld = false;
             global.scene.attach(this._pivotPoint);
-            this._physicsModel.setRigidBodyFlag(global.PhysX.PxRigidBodyFlag.eKINEMATIC, false);
-            this.authority = 1;
+            if(!global.chessXR.isStrict) {
+                this._physicsModel.setRigidBodyFlag(global.PhysX.PxRigidBodyFlag.eKINEMATIC, false);
+                this.authority = 1;
+            }
         }
     }
 
@@ -257,6 +313,7 @@ export default class PhysicsChessPiece {
             this.authority += 1;
             otherChessPiece.authority += 1;
             if(this.ownership != otherChessPiece.ownership) {
+                //Default to impolite user ownership
                 this.ownership = 0;
                 otherChessPiece.ownership = 0;
             }
@@ -335,14 +392,64 @@ export default class PhysicsChessPiece {
         physicsModel.setKinematicTarget(transform);
     }
 
+    getWorldPosition(vector) {
+        this._pivotPoint.getWorldPosition(vector);
+        vector.y -= this._verticalOffset * this._scale;
+        return vector;
+    }
+
+    jumpTo(square, promoteCallback) {
+        this._translateTo(0.1, square, promoteCallback);
+    }
+
+    slideTo(square, promoteCallback) {
+        this._translateTo(0, square, promoteCallback);
+    }
+
+    _translateTo(midHeightOffset, square, promoteCallback) {
+        this.chessPosition = square.chessPosition;
+        let newPosition = this._worldPosition.clone();
+        square.getWorldPosition(newPosition);
+        newPosition.y += this._verticalOffset * this._scale;
+        let middlePoint = newPosition.clone();
+        middlePoint.add(this._pivotPoint.position);
+        middlePoint.divideScalar(2);
+        middlePoint.y += this._scale * midHeightOffset;
+        this._movementCurve = new THREE.CatmullRomCurve3([ this._pivotPoint.position.clone(), middlePoint, newPosition ]);
+        this._movementTime = 0;
+        this._promote = promoteCallback;
+    }
+
+    promoteTo(promotion) {
+        if(promotion == "q") {
+            this._replaceWith("/library/models/chess_queen.glb");
+        } else if(promotion == "n") {
+            this._replaceWith("/library/models/chess_knight.glb");
+        } else if(promotion == "r") {
+            this._replaceWith("/library/models/chess_rook.glb");
+        } else if(promotion == "b") {
+            this._replaceWith("/library/models/chess_bishop.glb");
+        }
+    }
+
     reset(useDeadPosition) {
         this.beLetGoBy(this._pivotPoint.parent);
         this.ownership = 0;
         this.authority = 1;
+        this._pivotPoint.remove(this._promotedMesh);
+        this._pivotPoint.add(this._ogMesh);
+        this._isPromoted = true;
         if(useDeadPosition) {
+            this._pivotPoint.getWorldPosition(this._worldPosition);
             this._pivotPoint.position.fromArray(this._deadPosition);
+            this.isAlive = false;
+            this._pivotPoint.getWorldPosition(this._worldPosition);
+            this._movementTime = null;
+            this._promote = null;
         } else {
             this._pivotPoint.position.fromArray(this._position);
+            this.isAlive = true;
+            this.chessPosition = this._originalChessPosition;
         }
         this._pivotPoint.rotation.fromArray(this._rotation);
         //this._updatePhysicsModelFromMesh(this._pivotPoint, this._physicsModel);
@@ -367,13 +474,24 @@ export default class PhysicsChessPiece {
     }
 
     update(timeDelta) {
-        if(this._isHeld) {
+        if(this._isHeld || this._isKinematic) {
             this._updatePhysicsModelFromMesh(this._pivotPoint, this._physicsModel);
         } else {
             if(this._pivotPoint.position.y < -100) {
                 this.reset(true);
             } else {
                 this._updateMeshFromPhysicsModel(this._pivotPoint, this._physicsModel);
+            }
+        }
+        if(this._movementTime != null) {
+            this._movementTime = Math.min(this._movementTime + timeDelta, 1);
+            this._movementCurve.getPointAt(this._movementTime, this._pivotPoint.position);
+            if(this._movementTime == 1) {
+                this._movementTime = null;
+                if(this._promote) {
+                    this._promote(this);
+                    this._promote = null;
+                }
             }
         }
     }

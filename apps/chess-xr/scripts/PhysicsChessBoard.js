@@ -9,16 +9,20 @@ export default class PhysicsChessBoard {
         this._pivotPoint = new THREE.Object3D();;
         this._mesh;
         this._physicsModel;
+        this.positions = {};
         this._length = params['Length'];
         this._position = (params['Position']) ? params['Position'] : [0,0,0];
         this._rotation = (params['Rotation']) ? params['Rotation'] : [0,0,0];
         this._sideTablesEnabled = params['Side Tables Enabled'];
+        this._v1 = new THREE.Vector3();
+        this._v2 = new THREE.Vector3();
         this._canvas = document.createElement("canvas");
         this._createImages();
         this._createTexture();
         this._createMesh();
         this._createPhysicsModel();
 
+        global.chessXR.registerChessBoard(this);
         global.physicsObjects[this.id] = this;
     }
 
@@ -146,6 +150,28 @@ export default class PhysicsChessBoard {
         this._pivotPoint.add(this._mesh);
         this._pivotPoint.position.fromArray(this._position);
         this._pivotPoint.rotation.fromArray(this._rotation);
+        
+        //Build positions to be used for raycasting
+        geometry = new THREE.PlaneBufferGeometry(this._length / 10, this._length / 10);
+        let squareLength = this._length / 10;
+        for(let i = 0; i < 8; i++) {
+            for(let j = 0; j < 8; j++) {
+                material = new THREE.MeshBasicMaterial({
+                    color: 0xffd700,
+                    transparent: true,
+                    opacity: 0,
+                });
+                let position = String.fromCharCode(i + 'a'.charCodeAt(0)) + (j + 1);
+                let mesh = new THREE.Mesh(geometry, material);
+                mesh.position.y = this._length / 40 + 0.001;
+                mesh.position.x = squareLength * (3.5 - i);
+                mesh.position.z = -squareLength * (3.5 - j);
+                mesh.rotateX(-Math.PI/2);
+                mesh.chessPosition = position;
+                this.positions[position] = mesh;
+                this._pivotPoint.add(mesh);
+            }
+        }
     }
 
     _createPhysicsModel() {
@@ -213,6 +239,34 @@ export default class PhysicsChessBoard {
         physicsModel.attachShape(shape);
         physicsModel.setId(this.id);
         return physicsModel;
+    }
+
+    getSquare(raycaster, positions) {
+        for(let position in positions) {
+            let intersections = raycaster.intersectObject(this.positions[position]);
+            if(intersections.length > 0) {
+                return this.positions[position];
+            }
+        }
+        return null;
+    }
+
+    getSquareFromPiece(piece) {
+        let square;
+        if(piece) {
+            let shortestDistance = this._length / 10;
+            let positions = global.chessXR.moves[piece.chessPosition];
+            piece.getWorldPosition(this._v1);
+            for(let position in positions) {
+                this.positions[position].getWorldPosition(this._v2);
+                let distance = this._v1.distanceTo(this._v2);
+                if(distance < shortestDistance) {
+                    square = this.positions[position];
+                    shortestDistance = distance;
+                }
+            }
+        }
+        return square;
     }
 
     addToScene(scene) {

@@ -28,6 +28,7 @@ export default class PhysicsChessSet {
         let pieceHeight = this._boardLength / 40;
         let pawnParams = {
             "Filename": "/library/models/chess_pawn.glb",
+            "Chess Position": "h7",
             "Color": 0x333333,
             "Radii": [0.015,0.015,0.005,0.009,0.01,0.008,0.003],
             "Heights": [0.012,0.027,0.0049,0.0049,0.0049,0.0049],
@@ -49,6 +50,7 @@ export default class PhysicsChessSet {
         };
         let rookParams = {
             "Filename": "/library/models/chess_rook.glb",
+            "Chess Position": "h8",
             "Color": 0x333333,
             "Radii": [0.02,0.02,0.01,0.0134,0.0134],
             "Heights": [0.015,0.035,0.005,0.0146],
@@ -70,6 +72,7 @@ export default class PhysicsChessSet {
         };
         let knightParams = {
             "Filename": "/library/models/chess_knight.glb",
+            "Chess Position": "g8",
             "Color": 0x333333,
             "Radii": [0.02,0.02,0.0145,0.019,0.0183,0.015,0.021,0.021,0.011,0.001],
             "Heights": [0.013,0.008,0.004,0.0075,0.0058,0.0165,0.008,0.0075,0.002],
@@ -91,6 +94,7 @@ export default class PhysicsChessSet {
         };
         let bishopParams = {
             "Filename": "/library/models/chess_bishop.glb",
+            "Chess Position": "f8",
             "Color": 0x333333,
             "Radii": [0.02,0.02,0.0072,0.0105,0.0113,0.0078,0.003],
             "Heights": [0.015,0.046,0.007,0.007,0.007,0.0065],
@@ -112,6 +116,7 @@ export default class PhysicsChessSet {
         };
         let kingParams = {
             "Filename": "/library/models/chess_king.glb",
+            "Chess Position": "e8",
             "Color": 0x333333,
             "Radii": [0.0225,0.0225,0.008,0.0127,0.008, 0.008],
             "Heights": [0.012,0.049,0.016,0.008,0.0126],
@@ -133,6 +138,7 @@ export default class PhysicsChessSet {
         };
         let queenParams = {
             "Filename": "/library/models/chess_queen.glb",
+            "Chess Position": "d8",
             "Color": 0x333333,
             "Radii": [0.021,0.021,0.0078,0.0116,0.001],
             "Heights": [0.012,0.052,0.016,0.0095],
@@ -157,6 +163,8 @@ export default class PhysicsChessSet {
             this._pieces.push(pawn);
             pawnParams['Position'][0] += this._boardLength / 10;
             pawnParams['Dead Position'][2] += this._boardLength / 10;
+            pawnParams['Chess Position'] = String.fromCharCode(
+                pawnParams['Chess Position'].charCodeAt(0) - 1) + "7";
         }
         pawnParams['Color'] = 0xcccccc;
         pawnParams['Position'][2] -= this._boardLength / 2;
@@ -164,12 +172,14 @@ export default class PhysicsChessSet {
         for(let i = 0; i < 8; i++) {
             pawnParams['Position'][0] -= this._boardLength / 10;
             pawnParams['Dead Position'][2] -= this._boardLength / 10;
+            pawnParams['Chess Position'] = String.fromCharCode(
+                pawnParams['Chess Position'].charCodeAt(0) + 1) + "2";
             let pawn = this._addWithRotation(pawnParams);
             this._pieces.push(pawn);
         }
-        this._addDuos(rookParams);
-        this._addDuos(knightParams);
-        this._addDuos(bishopParams);
+        this._addDuos(rookParams, 'a', 'h');
+        this._addDuos(knightParams, 'b', 'g');
+        this._addDuos(bishopParams, 'c', 'f');
         this._addRoyalty(kingParams);
         this._addRoyalty(queenParams);
     }
@@ -228,21 +238,24 @@ export default class PhysicsChessSet {
         return piece;
     }
 
-    _addDuos(params) {
+    _addDuos(params, leftLetter, rightLetter) {
         let piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][0] *= -1;
         params['Dead Position'][2] *= -1;
+        params['Chess Position'] = leftLetter + "8";
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][2] -= this._boardLength * 14 / 20;
         params['Dead Position'][0] -= this._boardLength * 32 / 20;
+        params['Chess Position'] = leftLetter + "1";
         params['Rotation'][1] = Math.PI;
         params['Color'] = 0xcccccc;
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
         params['Position'][0] *= -1;
         params['Dead Position'][2] *= -1;
+        params['Chess Position'] = rightLetter + "1";
         piece = this._addWithRotation(params);
         this._pieces.push(piece);
     }
@@ -252,6 +265,7 @@ export default class PhysicsChessSet {
         this._pieces.push(piece);
         params['Position'][2] -= this._boardLength * 14 / 20;
         params['Dead Position'][0] -= this._boardLength * 32 / 20;
+        params['Chess Position'] = params['Chess Position'].charAt(0) + "1";
         params['Color'] = 0xcccccc;
         piece = this._addWithRotation(params);
         this._pieces.push(piece);

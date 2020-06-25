@@ -4,12 +4,19 @@ import { DeviceOrientationControls } from '/library/scripts/three/examples/jsm/c
 import global from '/library/scripts/core/global.js';
 
 export default class SessionHandler {
-    constructor() {
+    constructor(params) {
+        if(params == null) {
+            params = {};
+        }
         global.sessionActive = false;
         if(global.deviceType == "XR") {
             this._configureForXR();
         } else if(global.deviceType == "POINTER") {
-            this._configureForPointer();
+            if(params['Orbit Controls']) {
+                //TODO:
+            } else {
+                this._configureForPointer();
+            }
         } else if(global.deviceType == "MOBILE") {
             this._configureForMobile();
         }

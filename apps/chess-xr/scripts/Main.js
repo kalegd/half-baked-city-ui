@@ -61,6 +61,12 @@ export default class Main {
             1000 //Clipping for things farther than this amount
         );
         this._camera.position.setY(1.7); //Height of your eyes
+        if(global.deviceType != "XR") {
+            this._camera.rotateY(Math.PI/2);
+            this._camera.rotateX(-Math.PI/4);
+            this._user.position.setX(0.95);
+            this._user.position.setZ(-0.6);
+        }
         this._user.add(this._camera);
         this._scene.add(this._user);
         global.user = this._user;
@@ -68,9 +74,9 @@ export default class Main {
     }
 
     _createHandlers() {
-        this._sessionHandler = new SessionHandler(this._renderer, this._camera);
+        this._sessionHandler = new SessionHandler({ "Orbit Controls": true });
         this._inputHandler = new InputHandler(this._renderer, this._user);
-        this._audioHandler = new AudioHandler();
+        //this._audioHandler = new AudioHandler();
         global.inputHandler = this._inputHandler;
     }
 
@@ -179,16 +185,19 @@ export default class Main {
         if(global.deviceType == "XR") {
             rightHand.addToScene(global.inputHandler.getXRController("RIGHT", "grip"));
             leftHand.addToScene(global.inputHandler.getXRController("LEFT", "grip"));
+            this._dynamicAssets.push(rightHand);
+            this._dynamicAssets.push(leftHand);
         } else {
-            rightHand.addToScene(this._camera);
-            leftHand.addToScene(this._camera);
+            //rightHand.addToScene(this._camera);
+            //leftHand.addToScene(this._camera);
         }
-        this._dynamicAssets.push(rightHand);
-        this._dynamicAssets.push(leftHand);
 
         let ui = new ChessGameUI({
-            "Position": [0,1.5,-2],
-            "Rotation": [0 * Math.PI/8,0,0],
+            "Position": (global.deviceType) == "XR" ? [0,1.5,-2] : [0,1,-0.6],
+            "Rotation": (global.deviceType) == "XR"
+                ? [0,0,0]
+                : [-Math.PI/2, Math.PI/4, Math.PI/2],
+            "Scale": (global.deviceType == "XR") ? 1 : 0.5,
             "Font Family": "/library/fonts/Roboto-msdf.json",
             "Font Texture": "/library/fonts/Roboto-msdf.png",
         });
@@ -214,8 +223,8 @@ export default class Main {
         if(global.loadingAssets.size == 0) {
             new AddImmersion();
             $(this._loadingMessage).removeClass("loading");
-            this._sessionHandler.displayButton();
             if(global.deviceType == "XR") {
+                this._sessionHandler.displayButton();
                 this._renderer.setAnimationLoop((time, frame) => {
                     this._inputHandler.update(frame);
                     this._update();

@@ -274,9 +274,17 @@ export default class PhysicsHand {
                     this._heldObject = this._checkForAcquirableObject();
                     if(this._heldObject) {
                         this._heldObject.beAcquiredBy(this._grasp);
+                        if(global.chessXR.isStrict) {
+                            global.chessXR.pieceAcquiredDuringStrict(
+                                this._heldObject, this._hand);
+                        }
                     }
                 } else if(!squeezePressed && this._heldObject != null) {
                     this._heldObject.beLetGoBy(this._grasp);
+                    if(global.chessXR.isStrict) {
+                        global.chessXR.pieceLetGoDuringStrict(
+                            this._heldObject, this._hand);
+                    }
                     this._heldObject = null;
                 }
                 //} else if(!squeezePressed) {
@@ -294,6 +302,15 @@ export default class PhysicsHand {
             //TODO: Delete, this function is only for VR
             this._updateHoverablePieces();
         }
+    }
+
+    letGoOfObject() {
+        let object = this._heldObject;
+        if(this._heldObject) {
+            this._heldObject.beLetGoBy(this._grasp);
+            this._heldObject = null;
+        }
+        return object;
     }
 
     _updateMeshFromPhysicsModel(mesh, physicsModel) {

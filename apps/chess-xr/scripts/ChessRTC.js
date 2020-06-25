@@ -31,9 +31,10 @@ export default class ChessRTC {
     }
 
     _setupWebSocket() {
+        this._sentAudio = false;
         this._webSocket = new WebSocket(WEBSOCKET_URL);
         this._webSocket.onopen = () => {
-            console.log("We opened a connection!");
+            //console.log("We opened a connection!");
             if(this._socketConnectedCallback) {
                 this._socketConnectedCallback();
                 this._socketConnectedCallback = null;
@@ -44,6 +45,7 @@ export default class ChessRTC {
                 type: "requestRandomMatch",
                 userSessionId: this._userSessionId,
                 blacklist: this._blacklist,
+                strict: global.chessXR.isStrict,
             }));
             this._state = "SEARCHING";
         }
@@ -94,7 +96,11 @@ export default class ChessRTC {
             }
             try {
                 this._makingOffer = true;
-                await this._peerConnection.setLocalDescription();
+                //We used to use setLocalDescription(), but safari complains if
+                //we don't set any arguments
+                let offer = await this._peerConnection.createOffer();
+                if(this._peerConnection.signalingState != "stable") return;
+                await this._peerConnection.setLocalDescription(offer);
                 this._webSocket.send(JSON.stringify({
                     route: "forward_message",
                     peerConnectionId: this._peerConnectionId,
@@ -107,16 +113,24 @@ export default class ChessRTC {
             }
         };
         this._peerConnection.onconnectionstatechange = (event) => {
-            console.log(this._peerConnection.connectionState);
+            //console.log(this._peerConnection.connectionState);
             if(this._peerConnection.connectionState == "connected") {
-                this._state = "PLAYING";
-                this._webSocket.close();
-                this._connectingTimeoutFlag = false;
-                if(this._rtcConnectedCallback) {
-                    this._rtcConnectedCallback();
-                    this._rtcConnectedCallback = null;
+                if(!this._sentAudio) {
+                    this._sentAudio = true;
+                    this._state = "PLAYING";
+                    this._connectingTimeoutFlag = false;
+                    if(this._rtcConnectedCallback) {
+                        this._rtcConnectedCallback();
+                        this._rtcConnectedCallback = null;
+                    }
+                    setTimeout(() => {
+                        this._webSocket.close();
+                    }, 10000);
+                    this._myAudio.srcObject.getTracks().forEach((track) => {
+                        this._peerConnection.addTrack(track, this._myAudio.srcObject);
+                    });
                 }
-            } else if(this._peerConnection.connectionState == "failed") {
+            } else if(this._state == "PLAYING" && (this._peerConnection.connectionState == "failed" || this._peerConnection.connectionState == "disconnected")) {
                 global.chessXR.opponentLeft();
                 this._state = "LOCAL";
                 this._resetRTCAndPeerData();
@@ -134,14 +148,14 @@ export default class ChessRTC {
     _setupDataChannel() {
         this._sendDataChannel = this._peerConnection.createDataChannel("sendChannel");
         this._sendDataChannel.onopen = (event) => {
-            console.log(event);
+            //console.log(event);
             this._sendDataChannel.send(global.chessXR.displayName + ":" + global.chessXR.avatarURL);
         };
         this._sendDataChannel.onclose = (event) => {
-            console.log(event);
+            //console.log(event);
         };
         this._peerConnection.ondatachannel = (event) => {
-            console.log(event);
+            //console.log(event);
             this._receiveDataChannel = event.channel;
             this._receiveDataChannel.onmessage = (event) => {
                 let data = event.data;
@@ -176,7 +190,8 @@ export default class ChessRTC {
                 this._myAudio.srcObject = stream;
             })
             .catch((err) => {
-                console.error(err);
+                //Use empty stream
+                this._myAudio.srcObject = new MediaStream();
             }
         );
     }
@@ -199,9 +214,6 @@ export default class ChessRTC {
             }
         }, 10000);
         global.chessXR.polite = polite;
-        this._myAudio.srcObject.getTracks().forEach((track) => {
-            this._peerConnection.addTrack(track, this._myAudio.srcObject);
-        });
         this._setupDataChannel();
     }
 
@@ -212,9 +224,22 @@ export default class ChessRTC {
         if(this._ignoreOffer) {
             return;
         }
+        //We might want to initate a rollback if there's an offerCollision.
+        //See example in the following link
+        //  https://blog.mozilla.org/webrtc/perfect-negotiation-in-webrtc/
+        //if(offerCollision) {
+        //    await Promise.all([
+        //        this._peerConnection.setLocalDescription({type: "rollback"}),
+        //        this._peerConnection.setRemoteDescription(description)
+        //    ]);
+        //} else {
+        //    await this._peerConnection.setRemoteDescription(description);
+        //}
         await this._peerConnection.setRemoteDescription(description);
         if (description.type === 'offer') {
-            await this._peerConnection.setLocalDescription();
+            //We used to use setLocalDescription(), but safari complains if
+            //we don't set any arguments
+            await this._peerConnection.setLocalDescription(await this._peerConnection.createAnswer());
             this._webSocket.send(JSON.stringify({
                 route: "forward_message",
                 peerConnectionId: this._peerConnectionId,
