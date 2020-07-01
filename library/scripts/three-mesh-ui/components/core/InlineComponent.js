@@ -1,20 +1,21 @@
-/*
-	Job: no job yet
-	Knows: parent dimensions
+/**
+
+Job: nothing yet, but adding a isInline parameter to an inline component
+
+Knows: parent dimensions
+
 */
+export default function InlineComponent( Base = class {} ) {
 
-import MeshUIComponent from './MeshUIComponent.js';
+    return class InlineComponent extends Base {
 
-function InlineComponent() {
+        constructor( options ) {
 
-	const inlineComponent = Object.create( MeshUIComponent() );
+            super( options );
 
-	inlineComponent.type = 'InlineComponent'
+            this.isInline = true;
 
-	inlineComponent.isInline = true;
+        }
 
-	return inlineComponent
-
-};
-
-export default InlineComponent
+    }
+}

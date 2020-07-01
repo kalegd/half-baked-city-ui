@@ -196,8 +196,9 @@ export default class PhysicsChessPiece {
         if(isStrict) {
             this._physicsModel.setRigidBodyFlag(global.PhysX.PxRigidBodyFlag.eKINEMATIC, true);
             this._isKinematic = true;
-        } else {
+        } else if(!this._isHeld) {
             this._physicsModel.setRigidBodyFlag(global.PhysX.PxRigidBodyFlag.eKINEMATIC, false);
+            this._isKinematic = false;
         }
     }
 
@@ -416,6 +417,7 @@ export default class PhysicsChessPiece {
         middlePoint.divideScalar(2);
         middlePoint.y += this._scale * midHeightOffset;
         this._movementCurve = new THREE.CatmullRomCurve3([ this._pivotPoint.position.clone(), middlePoint, newPosition ]);
+        this._rotationPreTranslation = this._pivotPoint.rotation.toArray();
         this._movementTime = 0;
         this._promote = promoteCallback;
     }
@@ -452,7 +454,7 @@ export default class PhysicsChessPiece {
             this.chessPosition = this._originalChessPosition;
         }
         this._pivotPoint.rotation.fromArray(this._rotation);
-        //this._updatePhysicsModelFromMesh(this._pivotPoint, this._physicsModel);
+
         this._pivotPoint.getWorldPosition(this._worldPosition);
         this._pivotPoint.getWorldQuaternion(this._worldQuaternion);
         let transform = {
@@ -486,6 +488,14 @@ export default class PhysicsChessPiece {
         if(this._movementTime != null) {
             this._movementTime = Math.min(this._movementTime + timeDelta, 1);
             this._movementCurve.getPointAt(this._movementTime, this._pivotPoint.position);
+            this._pivotPoint.rotation.fromArray([
+                ((1 - this._movementTime) * this._rotationPreTranslation[0])
+                    + (this._movementTime * this._rotation[0]),
+                ((1 - this._movementTime) * this._rotationPreTranslation[1])
+                    + (this._movementTime * this._rotation[1]),
+                ((1 - this._movementTime) * this._rotationPreTranslation[2])
+                    + (this._movementTime * this._rotation[2])
+            ]);
             if(this._movementTime == 1) {
                 this._movementTime = null;
                 if(this._promote) {

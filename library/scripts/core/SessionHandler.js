@@ -1,6 +1,8 @@
 import { VRButton } from '/library/scripts/three/examples/jsm/webxr/VRButton.js';
+import { OrbitControls } from '/library/scripts/three/examples/jsm/controls/OrbitControls.js';
 import { PointerLockControls } from '/library/scripts/three/examples/jsm/controls/PointerLockControls.js';
 import { DeviceOrientationControls } from '/library/scripts/three/examples/jsm/controls/DeviceOrientationControls.js';
+import { Vector3 } from '/library/scripts/three/build/three.module.js';
 import global from '/library/scripts/core/global.js';
 
 export default class SessionHandler {
@@ -8,15 +10,15 @@ export default class SessionHandler {
         if(params == null) {
             params = {};
         }
+        this._useOrbitControls = params['Orbit Controls'];
+        this._orbitControlsTarget = (params['Orbit Controls Target'])
+            ? params['Orbit Controls Target']
+            : new Vector3(0,0,0);
         global.sessionActive = false;
         if(global.deviceType == "XR") {
             this._configureForXR();
         } else if(global.deviceType == "POINTER") {
-            if(params['Orbit Controls']) {
-                //TODO:
-            } else {
-                this._configureForPointer();
-            }
+            this._configureForPointer();
         } else if(global.deviceType == "MOBILE") {
             this._configureForMobile();
         }
@@ -41,16 +43,22 @@ export default class SessionHandler {
         this._stylizeElements();
         this._div.appendChild(this._button);
 
-        this._controls = new PointerLockControls(global.camera, this._button);
-        this._button.addEventListener('click', () => { this._controls.lock(); });
-        this._controls.addEventListener('lock', () => {
-            this._div.style.display = "none";
-            global.sessionActive = true;
-        });
-        this._controls.addEventListener('unlock', () => {
-            this._div.style.display = "block";
-            global.sessionActive = false;
-        });
+        if(this._useOrbitControls) {
+            this._controls = new OrbitControls(global.camera, global.renderer.domElement);
+            this._controls.target = this._orbitControlsTarget;
+            this._controls.zoomSpeed = 0.4;
+        } else {
+            this._controls = new PointerLockControls(global.camera, this._button);
+            this._button.addEventListener('click', () => { this._controls.lock(); });
+            this._controls.addEventListener('lock', () => {
+                this._div.style.display = "none";
+                global.sessionActive = true;
+            });
+            this._controls.addEventListener('unlock', () => {
+                this._div.style.display = "block";
+                global.sessionActive = false;
+            });
+        }
     }
 
     _configureForMobile() {
@@ -60,11 +68,17 @@ export default class SessionHandler {
         this._stylizeElements();
         this._div.appendChild(this._button);
 
-        this._button.addEventListener('touchend', () => {
-            this._controls = new DeviceOrientationControls(global.camera)
-            this._div.style.display = "none";
-            global.sessionActive = true;
-        });
+        if(this._useOrbitControls) {
+            this._controls = new OrbitControls(global.camera, global.renderer.domElement);
+            this._controls.target = this._orbitControlsTarget;
+            this._controls.zoomSpeed = 0.4;
+        } else {
+            this._button.addEventListener('touchend', () => {
+                this._controls = new DeviceOrientationControls(global.camera)
+                this._div.style.display = "none";
+                global.sessionActive = true;
+            });
+        }
     }
 
     _stylizeElements() {
@@ -89,7 +103,7 @@ export default class SessionHandler {
     }
 
     update() {
-        if(this._controls && this._controls.enabled) {
+        if(this._controls && (this._controls.enabled || this._useOrbitControls)) {
             this._controls.update();
         }
     }

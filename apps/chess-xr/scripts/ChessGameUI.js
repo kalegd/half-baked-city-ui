@@ -77,17 +77,8 @@ export default class ChessGameUI {
     }
 
     _createMaterials() {
-        this._backgroundMaterial = new THREE.MeshBasicMaterial({
-            color: 0x000000,
-            side: 2,
-            transparent: true,
-            opacity: 0.9
-        });
-        this._clearMaterial = new THREE.MeshLambertMaterial({
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0,
-        });
+        this._backgroundColor = new THREE.Color(0x000000);
+        this._backgroundOpacity = 0.9;
     }
 
     _createUIs() {
@@ -122,10 +113,11 @@ export default class ChessGameUI {
 
     _createGetAnAvatarUI() {
         global.temp = ThreeMeshUI;
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -136,7 +128,7 @@ export default class ChessGameUI {
         let infoBlock = ThreeMeshUIHelper.createTextBlock({
             'text': "Did you know you can create an Avatar on https://readyplayer.me and then add it to your Half Baked City Account?",
             'height': 0.25,
-            'width': 1.4,
+            'width': 1.25,
         });
         let continueButton = ThreeMeshUIHelper.createButtonBlock({
             'text': 'Continue',
@@ -154,10 +146,11 @@ export default class ChessGameUI {
     }
 
     _createMainUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let textBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -177,29 +170,35 @@ export default class ChessGameUI {
         //        this.setScreen('HOST_OR_JOIN');
         //    },
         //});
-        let settingsButton = ThreeMeshUIHelper.createButtonBlock({
-            'text': 'Settings',
-            'ontrigger': () => {
-                this.setScreen('SETTINGS');
-            },
-        });
+        let settingsButton;
+        if(global.deviceType == 'XR') {
+            settingsButton = ThreeMeshUIHelper.createButtonBlock({
+                'text': 'Settings',
+                'ontrigger': () => {
+                    this.setScreen('SETTINGS');
+                },
+            });
+        }
         container.add(textBlock);
         container.add(randomMatchButton);
         //container.add(roomButton);
-        container.add(settingsButton);
+        if(global.deviceType == 'XR') {
+            container.add(settingsButton);
+            this._interactables['MAIN'].push(settingsButton);
+        }
         container.set({ fontFamily: this._fontFamily, fontTexture: this._fontTexture });
         this._interactables['MAIN'].push(container);
         this._interactables['MAIN'].push(randomMatchButton);
         //this._interactables['MAIN'].push(roomButton);
-        this._interactables['MAIN'].push(settingsButton);
         return container;
     }
 
     _createGameTypeUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let textBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -245,10 +244,11 @@ export default class ChessGameUI {
     }
 
     _createWaitForRandomUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -278,10 +278,11 @@ export default class ChessGameUI {
     }
 
     _createPlayingPhysicsUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -320,10 +321,11 @@ export default class ChessGameUI {
     }
 
     _createPlayingStrictUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -337,19 +339,19 @@ export default class ChessGameUI {
             'height': 0.15,
             'width': 1.2,
         });
-        let rowBlock = ThreeMeshUI.Block({
+        let rowBlock = new ThreeMeshUI.Block({
             'height': 0.15,
             'width': 0.7,
             'contentDirection': 'row',
             'justifyContent': 'center',
-            'backgroundMaterial': this._clearMaterial,
+            'backgroundOpacity': 0,
             'margin': 0.02,
         });
         let forfeitButton = ThreeMeshUIHelper.createButtonBlock({
             'text': 'Forfeit',
             'width': 0.33,
             'ontrigger': () => {
-                this.setScreen('SETTINGS');
+                global.chessXR.forfeit();
             },
         });
         this._drawButton = ThreeMeshUIHelper.createButtonBlock({
@@ -394,10 +396,11 @@ export default class ChessGameUI {
     }
 
     _createDrawOfferedUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -435,10 +438,11 @@ export default class ChessGameUI {
     }
 
     _createGameOverUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -479,10 +483,11 @@ export default class ChessGameUI {
     }
 
     _createWaitForResponseUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -512,10 +517,11 @@ export default class ChessGameUI {
     }
 
     _createHostOrJoinUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -544,10 +550,11 @@ export default class ChessGameUI {
     }
 
     _createOpponentLeftUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -573,6 +580,7 @@ export default class ChessGameUI {
             'text': 'Main Menu',
             'ontrigger': () => {
                 this.setScreen('MAIN');
+                global.chessXR.toggleStrict(false);
                 this.updateOpponentName();
             },
         });
@@ -588,10 +596,11 @@ export default class ChessGameUI {
     }
 
     _createSettingsUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -611,12 +620,12 @@ export default class ChessGameUI {
                 this.setScreen(this._lastScreen);
             },
         });
-        let heightBlock = ThreeMeshUI.Block({
+        let heightBlock = new ThreeMeshUI.Block({
             'height': 0.15,
             'width': 0.7,
             'contentDirection': 'row',
             'justifyContent': 'center',
-            'backgroundMaterial': this._clearMaterial,
+            'backgroundOpacity': 0,
             'margin': 0.02,
         });
         let heightTitleBlock = ThreeMeshUIHelper.createTextBlock({
@@ -641,12 +650,12 @@ export default class ChessGameUI {
                 global.user.translateY(-0.05);
             },
         });
-        let sizeBlock = ThreeMeshUI.Block({
+        let sizeBlock = new ThreeMeshUI.Block({
             'height': 0.15,
             'width': 0.7,
             'contentDirection': 'row',
             'justifyContent': 'center',
-            'backgroundMaterial': this._clearMaterial,
+            'backgroundOpacity': 0,
             'margin': 0.02,
         });
         let sizeTitleBlock = ThreeMeshUIHelper.createTextBlock({
@@ -700,10 +709,11 @@ export default class ChessGameUI {
     }
 
     _createPleaseWaitUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -724,10 +734,11 @@ export default class ChessGameUI {
     }
 
     _createVROnlyUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -756,10 +767,11 @@ export default class ChessGameUI {
     }
 
     _createPawnPromotionUI() {
-        let container = ThreeMeshUI.Block({
+        let container = new ThreeMeshUI.Block({
             height: 1,
             width: 1.5,
-            backgroundMaterial: this._backgroundMaterial,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
         });
         let titleBlock = ThreeMeshUIHelper.createTextBlock({
             'text': 'Chess XR',
@@ -772,20 +784,20 @@ export default class ChessGameUI {
             'height': 0.15,
             'width': 1.4,
         });
-        let row1Block = ThreeMeshUI.Block({
+        let row1Block = new ThreeMeshUI.Block({
             'height': 0.15,
             'width': 0.7,
             'contentDirection': 'row',
             'justifyContent': 'center',
-            'backgroundMaterial': this._clearMaterial,
+            'backgroundOpacity': 0,
             'margin': 0.02,
         });
-        let row2Block = ThreeMeshUI.Block({
+        let row2Block = new ThreeMeshUI.Block({
             'height': 0.15,
             'width': 0.7,
             'contentDirection': 'row',
             'justifyContent': 'center',
-            'backgroundMaterial': this._clearMaterial,
+            'backgroundOpacity': 0,
             'margin': 0.02,
         });
         let queenButton = ThreeMeshUIHelper.createButtonBlock({
@@ -879,6 +891,13 @@ export default class ChessGameUI {
             textComponent.set({content: 'Stalemate'});
         } else if (type == "DRAW") {
             textComponent.set({content: 'Match Ended in a Draw'});
+        } else if (type == "MY_FORFEIT") {
+            textComponent.set({content: 'You have forfeited the match'});
+        } else if (type == "PEER_FORFEIT") {
+            let opponentName = (global.chessXR.opponentName)
+                ? global.chessXR.opponentName
+                : "...";
+            textComponent.set({content: opponentName + ' has forfeited'});
         }
     }
 

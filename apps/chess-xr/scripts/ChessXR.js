@@ -34,6 +34,7 @@ export default class ChessXRController {
         this.strictGame = new Chess();
         this.moves = {};
         this._lastMove = "";
+        this._gameNumber = 0;
         this._moveNumber = 0;
         this._mouseClicked = false;
     }
@@ -73,14 +74,12 @@ export default class ChessXRController {
         }
     }
 
-    playRandomOpponent(isStrict) {
-        if(typeof isStrict == "boolean") {
-            this.isStrict = isStrict;
-        }
+    playRandomOpponent() {
         this._rtc.playRandomOpponent(() => {
             this._ui.setScreen('WAIT_FOR_RANDOM');
         }, () => {
             if(this.isStrict) {
+                this._gameNumber = 0;
                 this.startStrictGame();
             } else {
                 this._ui.setScreen('PLAYING_PHYSICS');
@@ -113,6 +112,7 @@ export default class ChessXRController {
         this._rightPeerHand.removeFromScene();
         this._opponentAvatar.removeFromScene();
         this._peerConnected = false;
+        this.toggleStrict(false);
     }
 
     opponentLeft() {
@@ -141,6 +141,15 @@ export default class ChessXRController {
     claimDraw() {
         this._strictFlags.add("CD");
         this._ui.strictGameOver("DRAW");
+        this._ui.setScreen("GAME_OVER");
+        if(global.deviceType != "XR") {
+            this._ui.addToScene(global.scene);
+        }
+    }
+
+    forfeit() {
+        this._strictFlags.add("F");
+        this._ui.strictGameOver("MY_FORFEIT");
         this._ui.setScreen("GAME_OVER");
         if(global.deviceType != "XR") {
             this._ui.addToScene(global.scene);
@@ -176,10 +185,24 @@ export default class ChessXRController {
     }
 
     _receiveDrawClaim() {
-        this._ui.strictGameOver("DRAW");
-        this._ui.setScreen("GAME_OVER");
-        if(global.deviceType != "XR") {
-            this._ui.addToScene(global.scene);
+        if(!this._strictFlags.has("OCD")) {
+            this._strictFlags.add("OCD");
+            this._ui.strictGameOver("DRAW");
+            this._ui.setScreen("GAME_OVER");
+            if(global.deviceType != "XR") {
+                this._ui.addToScene(global.scene);
+            }
+        }
+    }
+
+    _receiveForfeit() {
+        if(!this._strictFlags.has("OF")) {
+            this._strictFlags.add("OF");
+            this._ui.strictGameOver("PEER_FORFEIT");
+            this._ui.setScreen("GAME_OVER");
+            if(global.deviceType != "XR") {
+                this._ui.addToScene(global.scene);
+            }
         }
     }
 
@@ -206,9 +229,8 @@ export default class ChessXRController {
             this.color = "b";
             if(global.deviceType != "XR") {
                 this._ui.removeFromScene();
-                if(global.user.position.x > 0) {
-                    global.user.position.x *= -1;
-                    global.user.rotateY(Math.PI);
+                if(this._ui._pivotPoint.rotation.y > 0) {
+                    global.camera.position.fromArray([-0.95,1.7,-0.6]);
                     this._ui.flipDisplay();
                 }
             }
@@ -216,9 +238,8 @@ export default class ChessXRController {
             this.color = "w";
             if(global.deviceType != "XR") {
                 this._ui.removeFromScene();
-                if(global.user.position.x < 0) {
-                    global.user.position.x *= -1;
-                    global.user.rotateY(Math.PI);
+                if(this._ui._pivotPoint.rotation.y < 0) {
+                    global.camera.position.fromArray([0.95,1.7,-0.6]);
                     this._ui.flipDisplay();
                 }
             }
@@ -227,6 +248,7 @@ export default class ChessXRController {
         this.resetPieces();
         this._updateChessMoves();
         this._lastMove = "";
+        this._gameNumber++;
         this._moveNumber = 0;
         this._canClaimDraw = false;
         this._drawOffered = false;
@@ -472,26 +494,31 @@ export default class ChessXRController {
 
     _fillSecondaryStrictStreamData(dataStream) {
         let i = 0;
-        dataStream[22] = this._moveNumber;
+        dataStream[22] = this._gameNumber;
+        dataStream[23] = this._moveNumber;
         while(i < this._lastMove.length) {
-            dataStream[23 + i] = this._lastMove.charCodeAt(i);
+            dataStream[24 + i] = this._lastMove.charCodeAt(i);
             i++;
         }
-        dataStream[23 + i] = -1;
+        dataStream[24 + i] = -1;
         i++;
         if(this._strictFlags.has("OD")) {
-            dataStream[23 + i] = "O".charCodeAt(0);
+            dataStream[24 + i] = "O".charCodeAt(0);
             i++;
         }
         if(this._strictFlags.has("CD")) {
-            dataStream[23 + i] = "C".charCodeAt(0);
+            dataStream[24 + i] = "C".charCodeAt(0);
             i++;
         }
         if(this._strictFlags.has("PA")) {
-            dataStream[23 + i] = "P".charCodeAt(0);
+            dataStream[24 + i] = "P".charCodeAt(0);
             i++;
         }
-        dataStream[23 + i] = -1;
+        if(this._strictFlags.has("F")) {
+            dataStream[24 + i] = "F".charCodeAt(0);
+            i++;
+        }
+        dataStream[24 + i] = -1;
     }
 
     _updateHoveredPiece() {
@@ -620,13 +647,12 @@ export default class ChessXRController {
         } else if(global.deviceType != "XR") {
             if(!this._selectedPiece) {
                 if(global.inputHandler.isPointerPressed() || global.inputHandler.isScreenTouched()) {
-                    if(this._mouseClicked) {
-                        this._updateHoveredPiece();
-                    } else {
+                    this._updateHoveredPiece();
+                    if(!this._mouseClicked) {
                         this._mouseClicked = true;
                         this._clickedPiece = this._hoveredPiece;
                     }
-                } else if(!global.inputHandler.isPointerPressed() || global.inputHandler.isScreenTouched()) {
+                } else if(!global.inputHandler.isPointerPressed() && !global.inputHandler.isScreenTouched()) {
                     if(this._mouseClicked) {
                         if(this._clickedPiece == this._hoveredPiece) {
                             this._selectedPiece = this._hoveredPiece;
@@ -639,13 +665,12 @@ export default class ChessXRController {
                 }
             } else {
                 if(global.inputHandler.isPointerPressed() || global.inputHandler.isScreenTouched()) {
-                    if(this._mouseClicked) {
-                        this._updateHoveredSquare();
-                    } else {
+                    this._updateHoveredSquare();
+                    if(!this._mouseClicked) {
                         this._mouseClicked = true;
                         this._clickedSquare = this._hoveredSquare;
                     }
-                } else if(!global.inputHandler.isPointerPressed() || global.inputHandler.isScreenTouched()) {
+                } else if(!global.inputHandler.isPointerPressed() && !global.inputHandler.isScreenTouched()) {
                     if(this._mouseClicked) {
                         if(this._clickedSquare == this._hoveredSquare) {
                             if(this._hoveredSquare) {
@@ -747,10 +772,10 @@ export default class ChessXRController {
     }
 
     _handleStrictPeerData(data) {
-        if(data[22] != this._moveNumber && data[22] != this._moveNumber + 1) {
+        if(data[22] != this._gameNumber || (data[23] != this._moveNumber && data[23] != this._moveNumber + 1)) {
             return; 
         }   
-        let offset = 23;
+        let offset = 24;
         let move = "";
         while(data[offset] != -1) {
             move += String.fromCharCode(data[offset]);
@@ -765,10 +790,12 @@ export default class ChessXRController {
                 this._receiveDrawClaim();
             } else if(flag == "P") {
                 this._receivePlayAgainRequest();
+            } else if(flag == "F") {
+                this._receiveForfeit();
             }
             offset++;
         }
-        if(data[22] == this._moveNumber + 1) {
+        if(data[23] == this._moveNumber + 1) {
             this._makeMove(move);
         }
     }

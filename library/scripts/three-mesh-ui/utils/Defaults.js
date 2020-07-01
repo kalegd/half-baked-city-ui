@@ -1,18 +1,14 @@
 
-/*
-	Job: List the default values of the lib components
-	Knows: Nothing
-*/
+import { Color } from '../../three/build/three.module.js';
 
-import { MeshBasicMaterial, Color } from '../../three/build/three.module.js';
-
+/** List the default values of the lib components */
 export default {
 	container: null,
 	fontFamily: null,
 	fontSize: 0.05,
 	offset: 0.01,
 	interLine: 0.01,
-	breakOn: '- ',
+	breakOn: '- ,.:?!',
 	contentDirection: "column",
 	alignContent: "center",
 	justifyContent: "start",
@@ -22,16 +18,8 @@ export default {
 	fontOpacity: 1,
 	borderRadius: 0.015,
 	backgroundSize: "cover",
-
-	fontMaterial: new MeshBasicMaterial({
-		color: 0xffffff
-	}),
-
-	backgroundMaterial: new MeshBasicMaterial({
-		color: 0x000000,
-		side: 2,
-		transparent: true,
-		opacity: 0.4
-	})
-
+	backgroundColor: new Color( 0x222222 ),
+	backgroundOpacity: 0.8,
+	backgroundTexture: null,
+	hiddenOverflow: false,
 };

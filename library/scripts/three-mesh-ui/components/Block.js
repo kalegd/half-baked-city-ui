@@ -1,125 +1,143 @@
 
-/*
-	Job: Keep a THREE.Object3D that contains the 3D content
-	Knows: Its size and limits, and the THREE.Object3D containing the content and its transform.
-*/
-
 import { Object3D } from '../../three/build/three.module.js';
 
 import BoxComponent from './core/BoxComponent.js';
+import InlineManager from './core/InlineManager.js';
+import MeshUIComponent from './core/MeshUIComponent.js';
+import MaterialManager from './core/MaterialManager.js';
+
 import Frame from '../content/Frame.js';
-import DeepDelete from '../utils/DeepDelete.js';
+import deepDelete from '../utils/deepDelete.js';
+import { mix } from '../utils/mix.js';
 
-function Block( options ) {
+/**
 
-	const block = Object.create( BoxComponent() );
+Job:
+- Update a Block component
+- Calls BoxComponent's API to position its children box components
+- Calls InlineManager's API to position its children inline components
+- Call creation and update functions of its background planes
 
-	block.type = 'Block';
+*/
+export default class Block extends mix.withBase( Object3D )(
+    BoxComponent,
+    InlineManager,
+    MaterialManager,
+    MeshUIComponent,
+) {
 
-	const frameContainer = new Object3D();
-	frameContainer.name = "MeshUI-FrameContainer"
-	block.add( frameContainer );
+    constructor( options ) {
 
-	block.frameContainer = frameContainer;
+        super( options );
 
-	////////////
-	//  UPDATE
-	////////////
+        this.isBlock = true;
 
-	block.parseParams = function ParseParams() {};
+        //
 
-	//
+        this.frameContainer = new Object3D();
 
-	block.updateLayout = function UpdateLayout() {
+        this.add( this.frameContainer );
 
-		// Get temporary dimension
+        // Lastly set the options parameters to this object, which will trigger an update
+        
+        this.set( options );
 
-		const WIDTH = block.getWidth();
+    }
 
-		const HEIGHT = block.getHeight();
+    ////////////
+    //  UPDATE
+    ////////////
 
-		if ( !WIDTH || !HEIGHT ) {
-			console.warn('Block got no dimension from its parameters or form children parameters');
-			return
-		};
+    parseParams( resolve ) { resolve() }
 
-		// Position this element according to earlier parent computation.
-		// Delegate to BoxComponent.
+    updateLayout() {
 
-		block.setPosFromParentRecords();
+        // Get temporary dimension
 
-		// Position inner elements according to dimensions and layout parameters.
-		// Delegate to BoxComponent.
+        const WIDTH = this.getWidth();
 
-		if ( !block.children.find( child => child.isInline ) ) {
+        const HEIGHT = this.getHeight();
 
-			block.computeChildrenPosition();
+        if ( !WIDTH || !HEIGHT ) {
+            console.warn('Block got no dimension from its parameters or from children parameters');
+            return
+        }
 
-		} else {
+        // Position this element according to earlier parent computation.
+        // Delegate to BoxComponent.
 
-			block.computeInlinesPosition();
+        this.setPosFromParentRecords();
 
-		};
-		
-		// Cleanup previous depictions
+        // Position inner elements according to dimensions and layout parameters.
+        // Delegate to BoxComponent.
 
-		DeepDelete( frameContainer );
+        if ( !this.children.find( child => child.isInline ) ) {
 
-		// Create new depictions
+            this.computeChildrenPosition();
 
-		const frame = Frame(
-			WIDTH,
-			HEIGHT,
-			block.getBorderRadius(),
-			block.getBackgroundSize(),
-			block.getBackgroundMaterial()
-		);
+        } else {
 
-		frame.renderOrder = block.getParentsNumber();
+            this.computeInlinesPosition();
 
-		frameContainer.add( frame );
+        }
+        
+        // Cleanup previous depictions
 
-		// We check if this block is the root component,
-		// because most of the time the user wants to set the
-		// root component's z position themselves
-		if ( block.getUIParent() ) {
+        deepDelete( this.frameContainer );
 
-			block.position.z = block.getOffset();
+        // Create new visible frame
 
-		};
+        this.frame = new Frame(
+            WIDTH,
+            HEIGHT,
+            this.getBorderRadius(),
+            this.getBackgroundSize(),
+            this.getBackgroundMaterial()
+        );
 
-	};
+        this.frame.renderOrder = this.getParentsNumber();
 
-	//
+        const component = this;
 
-	block.updateInner = function UpdateInner() {
+        // This is for hiddenOverflow to work
+        this.frame.onBeforeRender = function() {
 
-		// We check if this block is the root component,
-		// because most of the time the user wants to set the
-		// root component's z position themselves
-		if ( block.getUIParent() ) {
+            if ( component.updateClippingPlanes ) {
 
-			block.position.z = block.getOffset();
+                component.updateClippingPlanes();
 
-		};
+            }
 
-		frameContainer.traverse( (child)=> {
+        };
 
-			if ( child.material ) {
+        this.frameContainer.add( this.frame );
 
-				child.material = block.getBackgroundMaterial();
+        // We check if this block is the root component,
+        // because most of the time the user wants to set the
+        // root component's z position themselves
+        if ( this.getUIParent() ) {
 
-			};
+            this.position.z = this.getOffset();
 
-		});
-		
-	};
+        }
 
-	// Lastly set the options parameters to this object, which will trigger an update
-	block.set( options, true, true );
+    }
 
-	return block;
+    //
 
-};
+    updateInner() {
 
-export default Block ;
+        // We check if this block is the root component,
+        // because most of the time the user wants to set the
+        // root component's z position themselves
+        if ( this.getUIParent() ) {
+
+            this.position.z = this.getOffset();
+
+        }
+
+        if ( this.frame ) this.updateBackgroundMaterial();
+        
+    }
+
+}

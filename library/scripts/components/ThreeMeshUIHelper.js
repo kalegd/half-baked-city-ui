@@ -6,27 +6,28 @@ export default class ThreeMeshUIHelper {
     static createTextBlock(params) {
         let text = (params['text']) ? params['text'] : "";
         let fontSize = (params['fontSize']) ? params['fontSize'] : 0.06;
-        let fontColor = (params['fontColor']) ? params['fontColor'] : 0xffffff;
+        let fontColor = (params['fontColor'])
+            ? params['fontColor']
+            : new THREE.Color(0xffffff);
+        let backgroundColor = (params['backgroundColor'])
+            ? params['backgroundColor']
+            : null;
+        let backgroundOpacity = (params['backgroundOpacity'])
+            ? params['backgroundOpacity']
+            : 0;
         let height = (params['height']) ? params['height'] : 0.15;
         let width = (params['width']) ? params['width'] : 0.7;
-        let backgroundMaterial = (params['backgroundMaterial'])
-            ? params['backgroundMaterial']
-            : new THREE.MeshLambertMaterial({
-                side: THREE.DoubleSide,
-                color: 0x43464b,
-                transparent: true,
-                opacity: 0,
-            });
-        let textBlock = ThreeMeshUI.Block({
+        let textBlock = new ThreeMeshUI.Block({
             height: height,
             width: width,
             offset: 0.02,
             justifyContent: "center",
-            backgroundMaterial: backgroundMaterial,
+            backgroundColor: backgroundColor,
+            backgroundOpacity: backgroundOpacity,
         });
         let textComponent = new ThreeMeshUI.Text({
             content: text,
-            fontMaterial: new THREE.MeshBasicMaterial({ color: fontColor }),
+            fontColor: fontColor,
             fontSize: fontSize,
         });
         textBlock.add(textComponent);
@@ -37,35 +38,23 @@ export default class ThreeMeshUIHelper {
     static createButtonBlock(params) {
         let text = (params['text']) ? params['text'] : "";
         let fontSize = (params['fontSize']) ? params['fontSize'] : 0.06;
-        let fontColor = (params['fontColor']) ? params['fontColor'] : 0xffffff;
+        let fontColor = (params['fontColor'])
+            ? params['fontColor']
+            : new THREE.Color(0xffffff);
+        let idleBackgroundColor = (params['idleBackgroundColor'])
+            ? params['idleBackgroundColor']
+            : new THREE.Color(0x969696);
+        let hoveredBackgroundColor = (params['hoveredBackgroundColor'])
+            ? params['hoveredBackgroundColor']
+            : new THREE.Color(0x43464b);
+        let selectedBackgroundColor = (params['selectedBackgroundColor'])
+            ? params['selectedBackgroundColor']
+            : hoveredBackgroundColor;
         let height = (params['height']) ? params['height'] : 0.15;
         let width = (params['width']) ? params['width'] : 0.7;
         let margin = (params['margin']) ? params['margin'] : 0.02;
         let ontrigger = (params['ontrigger']) ? params['ontrigger'] : () => {};
-        let idleMaterial = (params['idleMaterial'])
-            ? params['idleMaterial']
-            : new THREE.MeshLambertMaterial({
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.5,
-            });
-        let hoveredMaterial = (params['hoveredMaterial'])
-            ? params['hoveredMaterial']
-            : new THREE.MeshLambertMaterial({
-                side: THREE.DoubleSide,
-                color: 0x43464b,
-                transparent: true,
-                opacity: 0.8,
-            });
-        let selectedMaterial = (params['selectedMaterial'])
-            ? params['selectedMaterial']
-            : new THREE.MeshLambertMaterial({
-                side: THREE.DoubleSide,
-                color: 0x43464b,
-                transparent: true,
-                opacity: 0.8,
-            });
-        let buttonBlock = ThreeMeshUI.Block({
+        let buttonBlock = new ThreeMeshUI.Block({
             height: height,
             width: width,
             justifyContent: 'center',
@@ -74,7 +63,7 @@ export default class ThreeMeshUIHelper {
         });
         let buttonText = new ThreeMeshUI.Text({
             content: text,
-            fontMaterial: new THREE.MeshBasicMaterial({ color: fontColor }),
+            fontColor: new THREE.Color(fontColor),
             fontSize: fontSize,
         });
         buttonBlock.add(buttonText);
@@ -82,7 +71,8 @@ export default class ThreeMeshUIHelper {
             state: "idle",
             attributes: {
                 offset: 0.02,
-                backgroundMaterial: idleMaterial
+                backgroundOpacity: 0.7,
+                backgroundColor: idleBackgroundColor,
             },
             //onSet: ()=> {
             //    console.log("Button now idle!");
@@ -92,7 +82,8 @@ export default class ThreeMeshUIHelper {
             state: "hovered",
             attributes: {
                 offset: 0.02,
-                backgroundMaterial: hoveredMaterial
+                backgroundOpacity: 0.8,
+                backgroundColor: hoveredBackgroundColor,
             },
             //onSet: ()=> {
             //    console.log("Button now hovered over!");
@@ -102,7 +93,8 @@ export default class ThreeMeshUIHelper {
             state: "selected",
             attributes: {
                 offset: 0.01,
-                backgroundMaterial: selectedMaterial
+                backgroundOpacity: 0.8,
+                backgroundColor: selectedBackgroundColor,
             },
             //onSet: ()=> {
             //    console.log("Selected button!");

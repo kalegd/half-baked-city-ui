@@ -1,153 +1,158 @@
-/*
 
-Job:
-	- computing its own size according to user measurements or content measurement
-	- creating 'inlines' objects with info, so that the parent component can organise them in lines
-
-Knows:
-	- Its text content (string)
-	- Font attributes ('font', 'fontType', 'fontSize')
-	- Parent block
-
-To learn more about the differences between Text types :
-https://github.com/felixmariotto/three-mesh-ui/wiki/Choosing-a-Text-type
-
-*/
+import { Object3D } from '../../three/build/three.module.js';
 
 import InlineComponent from './core/InlineComponent.js';
+import MeshUIComponent from './core/MeshUIComponent.js';
 import FontLibrary from './core/FontLibrary.js';
+import TextManager from './core/TextManager.js';
+import MaterialManager from './core/MaterialManager.js';
 
-import TextManager from '../content/TextManager.js';
-import DeepDelete from '../utils/DeepDelete.js';
+import deepDelete from '../utils/deepDelete.js';
+import { mix } from '../utils/mix.js';
 
-function Text( options ) {
+/**
 
-	const textComponent = Object.create( InlineComponent() );
+Job:
+- computing its own size according to user measurements or content measurement
+- creating 'inlines' objects with info, so that the parent component can organise them in lines
 
-	textComponent.type = "Text";
+Knows:
+- Its text content (string)
+- Font attributes ('font', 'fontSize'.. etc..)
+- Parent block
 
-	textComponent.textManager = TextManager();
+*/
+export default class Text extends mix.withBase( Object3D )(
+    InlineComponent,
+    TextManager,
+    MaterialManager,
+    MeshUIComponent,
+) {
 
-	textComponent.parseParams = function parseParams( resolve, reject ) {
+    constructor( options ) {
 
-		////////////////////////
-		// GET CHARS GEOMETRIES
-		////////////////////////
+        super( options );
 
-		const content = this.content ;
-		const font = this.getFontFamily();
-		const fontSize = this.getFontSize();
-		const breakChars = this.getBreakOn(); // characters to prioritize breaking line (eg: white space)
-		const textType = this.getTextType();
+        this.isText = true;
 
-		// Abort condition
-		
-		if ( !font || typeof font === 'string' ) {
-			if ( !FontLibrary.getFontOf( this ) ) console.warn('no font was found');
-			return
-		};
+        this.set( options );
 
-		if ( !this.content ) {
-			textComponent.inlines = null
-			return
-		};
+    }
 
-		if ( textType === 'geometry' && font.fontType !== 'Typeface' ) {
-			console.error( `${ textType } text is not compatible with the type of font '${ font.fontType }'.\n See https://github.com/felixmariotto/three-mesh-ui/wiki/Choosing-a-Text-type` )
-			return
-		};
+    ///////////
+    // UPDATES
+    ///////////
 
-		if ( textType === 'MSDF' && font.fontType !== 'MSDF' ) {
-			console.error( `${ textType } text is not compatible with the type of font '${ font.fontType }'.\n See https://github.com/felixmariotto/three-mesh-ui/wiki/Choosing-a-Text-type` )
-			return
-		};
 
-		// Compute glyphs sizes
+    /**
+     * Here we compute each glyph dimension, and we store it in this
+     * component's inlines parameter. This way the parent Block will
+     * compute each glyph position on updateLayout.
+     */
+    parseParams( resolve ) {
 
-		let chars = Array.from ? Array.from( content ) : String( content ).split( '' );
+        const content = this.content ;
+        const font = this.getFontFamily();
+        const fontSize = this.getFontSize();
+        const breakChars = this.getBreakOn();
+        const textType = this.getTextType();
 
-		const glyphInfos = chars.map( (glyph)=> {
+        // Abort condition
+        
+        if ( !font || typeof font === 'string' ) {
+            if ( !FontLibrary.getFontOf( this ) ) console.warn('no font was found');
+            return
+        }
 
-			// Get height, width, and anchor point of this glyph
-			const dimensions = textComponent.textManager.getGlyphDimensions({
-				textType,
-				glyph,
-				font,
-				fontSize
-			});
+        if ( !this.content ) {
+            this.inlines = null
+            return
+        }
 
-			//
+        if ( textType === 'geometry' && font.fontType !== 'Typeface' ) {
+            console.error( `${ textType } text is not compatible with the type of font '${ font.fontType }'.\n See https://github.com/felixmariotto/three-mesh-ui/wiki/Choosing-a-Text-type` )
+            return
+        }
 
-			let lineBreak = null ;
+        if ( textType === 'MSDF' && font.fontType !== 'MSDF' ) {
+            console.error( `${ textType } text is not compatible with the type of font '${ font.fontType }'.\n See https://github.com/felixmariotto/three-mesh-ui/wiki/Choosing-a-Text-type` )
+            return
+        }
 
-			if ( breakChars.includes( glyph ) || glyph.match(/\s/g) ) lineBreak = "possible" ;
+        // Compute glyphs sizes
 
-			if ( glyph.match(/\n/g) ) lineBreak = "mandatory" ;
+        const chars = Array.from ? Array.from( content ) : String( content ).split( '' );
 
-			//
+        const glyphInfos = chars.map( (glyph)=> {
 
-			return {
-				height: dimensions.height,
-				width: dimensions.width,
-				anchor: dimensions.anchor,
-				lineBreak,
-				glyph,
-				fontSize
-			};
+            // Get height, width, and anchor point of this glyph
+            const dimensions = this.getGlyphDimensions({
+                textType,
+                glyph,
+                font,
+                fontSize
+            });
 
-		});
+            //
 
-		// Update 'inlines' property, so that the parent can compute each glyph position
+            let lineBreak = null ;
 
-		textComponent.inlines = glyphInfos;
+            if ( breakChars.includes( glyph ) || glyph.match(/\s/g) ) lineBreak = "possible" ;
 
-		resolve();
+            if ( glyph.match(/\n/g) ) lineBreak = "mandatory" ;
 
-	};
+            //
 
-	textComponent.updateLayout = function updateLayout() {
+            return {
+                height: dimensions.height,
+                width: dimensions.width,
+                anchor: dimensions.anchor,
+                lineBreak,
+                glyph,
+                fontSize
+            };
 
-		/*
-		Create text content
+        });
 
-		At this point, text.inlines should have been modified by the parent
-		component, to add xOffset and yOffset properties to each inlines.
-		This way, TextContent knows were to position each character.
+        // Update 'inlines' property, so that the parent can compute each glyph position
 
-		*/
+        this.inlines = glyphInfos;
 
-		DeepDelete( textComponent );
+        resolve();
 
-		if ( textComponent.inlines ) {
+    }
 
-			const textContent = textComponent.textManager.create({
-				inlines: textComponent.inlines,
-				fontFamily: this.getFontFamily(),
-				fontMaterial: this.getFontMaterial(),
-				textType: this.getTextType(),
-				fontTexture: this.getFontTexture(),
-				fontColor: this.getFontColor(),
-				fontOpacity: this.getFontOpacity()
-			});
 
-			textComponent.add( textContent );
+    /**
+     * Create text content
+     * 
+     * At this point, text.inlines should have been modified by the parent
+     * component, to add xOffset and yOffset properties to each inlines.
+     * This way, TextContent knows were to position each character.
+     */
+    updateLayout() {
 
-		};
+        deepDelete( this );
 
-		textComponent.position.z = textComponent.getOffset();
+        if ( this.inlines ) {
 
-	};
+            // happening in TextManager
+            this.textContent = this.createText();
 
-	textComponent.updateInner = function updateInner() {
+            this.add( this.textContent );
 
-		textComponent.position.z = textComponent.getOffset();
+        }
 
-	};
+        this.position.z = this.getOffset();
 
-	textComponent.set( options );
+    }
 
-	return textComponent
+    updateInner() {
 
-};
+        this.position.z = this.getOffset();
 
-export default Text
+        if ( this.textContent ) this.updateTextMaterial();
+
+    }
+
+}

@@ -62,19 +62,24 @@ export default class Main {
         );
         this._camera.position.setY(1.7); //Height of your eyes
         if(global.deviceType != "XR") {
-            this._camera.rotateY(Math.PI/2);
-            this._camera.rotateX(-Math.PI/4);
-            this._user.position.setX(0.95);
-            this._user.position.setZ(-0.6);
+            //this._camera.rotateY(Math.PI/2);
+            //this._camera.rotateX(-Math.PI/4);
+            this._camera.position.setX(0.95);
+            this._camera.position.setZ(-0.6);
+            this._scene.add(this._camera);
+        } else {
+            this._user.add(this._camera);
+            this._scene.add(this._user);
         }
-        this._user.add(this._camera);
-        this._scene.add(this._user);
         global.user = this._user;
         global.camera = this._camera;
     }
 
     _createHandlers() {
-        this._sessionHandler = new SessionHandler({ "Orbit Controls": true });
+        this._sessionHandler = new SessionHandler({
+            "Orbit Controls": true,
+            "Orbit Controls Target": new THREE.Vector3(0,0.74,-0.6),
+        });
         this._inputHandler = new InputHandler(this._renderer, this._user);
         //this._audioHandler = new AudioHandler();
         global.inputHandler = this._inputHandler;
@@ -230,7 +235,10 @@ export default class Main {
                     this._update();
                 });
             } else if (global.deviceType == "POINTER") {
-                this._renderer.setAnimationLoop(() => { this._update(); });
+                this._renderer.setAnimationLoop(() => {
+                    this._sessionHandler.update();
+                    this._update();
+                });
             } else if (global.deviceType == "MOBILE") {
                 this._renderer.setAnimationLoop(() => {
                     this._sessionHandler.update();
@@ -253,8 +261,10 @@ export default class Main {
 
     _update() {
         let timeDelta = this._clock.getDelta();
-        global.physicsScene.simulate(timeDelta, true);
-        global.physicsScene.fetchResults(true);
+        if(global.deviceType == "XR") {
+            global.physicsScene.simulate(timeDelta, true);
+            global.physicsScene.fetchResults(true);
+        }
         for(let i = 0; i < this._dynamicAssets.length; i++) {
             this._dynamicAssets[i].update(timeDelta);
         }
