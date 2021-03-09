@@ -45,13 +45,13 @@ export default class InputHandler {
                 if(!global.sessionActive) this._keysPressed.clear();
             });
         }
-        document.addEventListener( 'mousedown', () => {
+        document.addEventListener( 'pointerdown', () => {
             this._pointerPressed = true;
         });
-        document.addEventListener( 'mouseup', () => {
+        document.addEventListener( 'pointerup', () => {
             this._pointerPressed = false;
         });
-        document.addEventListener( 'mousemove', (event) => {
+        document.addEventListener( 'pointermove', (event) => {
             this._pointerPosition.x = (event.clientX/window.innerWidth)*2-1;
             this._pointerPosition.y = -(event.clientY/window.innerHeight)*2+1;
         });
