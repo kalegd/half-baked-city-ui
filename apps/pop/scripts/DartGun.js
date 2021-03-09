@@ -53,7 +53,7 @@ export default class DartGun {
         this.update = this._preUpdate;
 
         if(global.deviceType == "XR") {
-            global.inputHandler.getXRController("RIGHT", "pointer")
+            global.inputHandler.getXRController("RIGHT", "targetRay")
                 .add(this._pivotPoint);
         } else {
             global.camera.add(this._pivotPoint);
@@ -242,10 +242,10 @@ export default class DartGun {
     _changeHands(newHand) {
         if(global.deviceType == "XR") {
             if(newHand == "RIGHT") {
-                global.inputHandler.getXRController("RIGHT", "pointer")
+                global.inputHandler.getXRController("RIGHT", "targetRay")
                     .add(this._pivotPoint);
             } else if(newHand == "LEFT") {
-                global.inputHandler.getXRController("LEFT", "pointer")
+                global.inputHandler.getXRController("LEFT", "targetRay")
                     .add(this._pivotPoint);
             }
         } else {

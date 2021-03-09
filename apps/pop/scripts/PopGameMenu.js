@@ -15,7 +15,7 @@ export default class PopGameMenu {
         this._pivotPoint = new THREE.Object3D();
         this._pointerPoint = new THREE.Object3D();
         if(global.deviceType == "XR") {
-            global.inputHandler.getXRController("RIGHT", "pointer")
+            global.inputHandler.getXRController("RIGHT", "targetRay")
                 .add(this._pointerPoint);
         } else {
             this._pointerPoint.position.setX(0.2);
@@ -364,10 +364,10 @@ export default class PopGameMenu {
     _changeHands(newHand) {
         if(global.deviceType == "XR") {
             if(newHand == "RIGHT") {
-                global.inputHandler.getXRController("RIGHT", "pointer")
+                global.inputHandler.getXRController("RIGHT", "targetRay")
                     .add(this._pointerPoint);
             } else if(newHand == "LEFT") {
-                global.inputHandler.getXRController("LEFT", "pointer")
+                global.inputHandler.getXRController("LEFT", "targetRay")
                     .add(this._pointerPoint);
             }
         } else {

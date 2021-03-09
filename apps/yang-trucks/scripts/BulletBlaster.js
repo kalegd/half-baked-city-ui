@@ -46,7 +46,7 @@ export default class BulletBlaster {
         this.update = this._preUpdate;
 
         if(global.deviceType == "XR") {
-            global.inputHandler.getXRController("RIGHT", "pointer")
+            global.inputHandler.getXRController("RIGHT", "targetRay")
                 .add(this._pivotPoint);
         } else {
             global.camera.add(this._pivotPoint);

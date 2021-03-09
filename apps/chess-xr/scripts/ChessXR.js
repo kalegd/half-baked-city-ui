@@ -31,12 +31,15 @@ export default class ChessXRController {
         this.opponentName;
         this.polite = true;
         this.isStrict = false;
+        this.isPlayingAI = false;
         this.strictGame = new Chess();
         this.moves = {};
         this._lastMove = "";
         this._gameNumber = 0;
         this._moveNumber = 0;
         this._mouseClicked = false;
+        this._chessAIWorker = new Worker('./scripts/ChessAIWorker.js');
+        this._chessAIWorker.onmessage = (e) => { this._handleAIMessage(e) };
     }
 
     registerHand(hand, side) {
@@ -92,6 +95,51 @@ export default class ChessXRController {
         });
     }
 
+    playAI(difficulty) {
+        this.isPlayingAI = true;
+        if(difficulty == "EASY") {
+            this._chessAIWorker.postMessage({ key: 'setDepth', value: 0 });
+        } else if(difficulty == "MEDIUM") {
+            this._chessAIWorker.postMessage({ key: 'setDepth', value: 1 });
+        } else if(difficulty == "HARD") {
+            this._chessAIWorker.postMessage({ key: 'setDepth', value: 2 });
+        }
+        this.color = 'b';
+        this.startAIGame();
+    }
+
+    startAIGame() {
+        this._ui.setScreen('PLAYING_AI');
+        if(this.color == 'w') {
+            this.color = 'b';
+            if(global.deviceType != "XR") {
+                this._ui.removeFromScene();
+                if(this._ui._pivotPoint.rotation.y > 0) {
+                    global.camera.position.fromArray([-0.95,1.7,-0.6]);
+                    this._ui.flipDisplay();
+                }
+            }
+        } else if(this.color == 'b') {
+            this.color = 'w';
+            if(global.deviceType != "XR") {
+                this._ui.removeFromScene();
+                if(this._ui._pivotPoint.rotation.y < 0) {
+                    global.camera.position.fromArray([0.95,1.7,-0.6]);
+                    this._ui.flipDisplay();
+                }
+            }
+        }
+        this.strictGame.reset();
+        this.resetPieces();
+        this._updateChessMoves();
+        if(this.color == 'b') {
+            this._chessAIWorker.postMessage({
+                key: 'calculateBestMove',
+                value: this.strictGame.fen()
+            });
+        }
+    }
+
     setOpponentNameAndAvatar(nameAndAvatar) {
         let name = nameAndAvatar.substr(0, nameAndAvatar.indexOf(":"));
         let avatarURL = nameAndAvatar.substr(nameAndAvatar.indexOf(":") + 1);
@@ -106,12 +154,16 @@ export default class ChessXRController {
     }
 
     quitGame() {
-        this._rtc.quit();
-        this._opponentName = null;
-        this._leftPeerHand.removeFromScene();
-        this._rightPeerHand.removeFromScene();
-        this._opponentAvatar.removeFromScene();
-        this._peerConnected = false;
+        if(this.isPlayingAI) {
+            this.isPlayingAI = false;
+        } else {
+            this._rtc.quit();
+            this._opponentName = null;
+            this._leftPeerHand.removeFromScene();
+            this._rightPeerHand.removeFromScene();
+            this._opponentAvatar.removeFromScene();
+            this._peerConnected = false;
+        }
         this.toggleStrict(false);
     }
 
@@ -314,6 +366,14 @@ export default class ChessXRController {
             this._moveNumber++;
             this.strictGame.move(san);
             this._updateChessMoves();
+            if(this.color != this.turn && !this.strictGame.game_over() && this.isPlayingAI) {
+                setTimeout(() => {
+                    this._chessAIWorker.postMessage({
+                        key: 'calculateBestMove',
+                        value: this.strictGame.fen()
+                    });
+                }, 500);
+            }
         }
         if(move.flags.includes("k")) {
             if(move.from == "e1") {
@@ -356,6 +416,14 @@ export default class ChessXRController {
             chessPiece.promoteTo(promotion);
             this.strictGame.move(san);
             this._updateChessMoves();
+            if(this.color != this.turn && !this.strictGame.game_over() && this.isPlayingAI) {
+                setTimeout(() => {
+                    this._chessAIWorker.postMessage({
+                        key: 'calculateBestMove',
+                        value: this.strictGame.fen()
+                    });
+                }, 500);
+            }
         });
         this._ui.addToScene(global.scene);
     }
@@ -395,8 +463,16 @@ export default class ChessXRController {
                 this._ui.addToScene(global.scene);
             }
         } else if(this.strictGame.in_draw() && !this._canClaimDraw) {
-            this._canClaimDraw = true;
-            this._ui.toggleDrawButton(true);
+            if(this.isPlayingAI) {
+                this._ui.strictGameOver("DRAW");
+                this._ui.setScreen("GAME_OVER");
+                if(global.deviceType != "XR") {
+                    this._ui.addToScene(global.scene);
+                }
+            } else {
+                this._canClaimDraw = true;
+                this._ui.toggleDrawButton(true);
+            }
         }
     }
 
@@ -592,7 +668,6 @@ export default class ChessXRController {
                 this._leftSelectedPiece = null;
                 if(piece != this._rightSelectedPiece) {
                     if(this._leftHoveredSquare) {
-                        //piece.slideTo(this._leftHoveredSquare);
                         this._makeMove(this.moves[piece.chessPosition][this._leftHoveredSquare.chessPosition]);
                         this._leftHoveredSquare.material.opacity = 0;
                         let rightObject = this._rightHand.letGoOfObject();
@@ -610,7 +685,6 @@ export default class ChessXRController {
                 this._rightSelectedPiece = null;
                 if(piece != this._leftSelectedPiece) {
                     if(this._rightHoveredSquare) {
-                        //piece.slideTo(this._rightHoveredSquare);
                         this._makeMove(this.moves[piece.chessPosition][this._rightHoveredSquare.chessPosition]);
                         this._rightHoveredSquare.material.opacity = 0;
                         let leftObject = this._leftHand.letGoOfObject();
@@ -674,7 +748,6 @@ export default class ChessXRController {
                     if(this._mouseClicked) {
                         if(this._clickedSquare == this._hoveredSquare) {
                             if(this._hoveredSquare) {
-                                //this._makeMove(this._selectedPiece.chessPosition, this._hoveredSquare.chessPosition);
                                 this._makeMove(this.moves[this._selectedPiece.chessPosition][this._hoveredSquare.chessPosition]);
                                 this._hoveredSquare.material.opacity = 0;
                                 this._hoveredSquare = null;
@@ -698,12 +771,14 @@ export default class ChessXRController {
                 this._rightSelectedPiece, this._rightHoveredSquare);
         }
 
-        this._frame += 1;
-        if(this._frame % 2) {
-            let dataStream = this._shortStream;
-            this._fillPrimaryStreamData(dataStream);
-            this._fillSecondaryStrictStreamData(dataStream);
-            this._rtc.sendPlayerData(Float32Array.from(dataStream));
+        if(!this.isPlayingAI) {
+            this._frame += 1;
+            if(this._frame % 2) {
+                let dataStream = this._shortStream;
+                this._fillPrimaryStreamData(dataStream);
+                this._fillSecondaryStrictStreamData(dataStream);
+                this._rtc.sendPlayerData(Float32Array.from(dataStream));
+            }
         }
     }
 
@@ -728,7 +803,9 @@ export default class ChessXRController {
     }
 
     update(timeDelta) {
-        if(!this._peerConnected) {
+        if(this.isPlayingAI) {
+            this._updateStrict(timeDelta);
+        } else if(!this._peerConnected) {
             return;
         } else if(this.isStrict) {
             this._updateStrict(timeDelta);
@@ -797,6 +874,13 @@ export default class ChessXRController {
         }
         if(data[23] == this._moveNumber + 1) {
             this._makeMove(move);
+        }
+    }
+
+    _handleAIMessage(e) {
+        let data = e.data;
+        if(data.key == "calculateBestMove") {
+            this._makeMove(data.value);
         }
     }
 }

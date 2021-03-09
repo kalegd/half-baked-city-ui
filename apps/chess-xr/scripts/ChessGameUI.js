@@ -20,10 +20,12 @@ export default class ChessGameUI {
             'GET_AN_AVATAR': [],
             'MAIN': [],
             'GAME_TYPE': [],
+            'AI_DIFFICULTY': [],
             'WAIT_FOR_RANDOM': [],
             'WAIT_FOR_RESPONSE': [],
             'PLAYING_PHYSICS': [],
             'PLAYING_STRICT': [],
+            'PLAYING_AI': [],
             'DRAW_OFFERED': [],
             'GAME_OVER': [],
             'HOST_OR_JOIN': [],
@@ -90,10 +92,12 @@ export default class ChessGameUI {
         this._screenContainers['GET_AN_AVATAR'] = this._createGetAnAvatarUI();
         this._screenContainers['MAIN'] = this._createMainUI();
         this._screenContainers['GAME_TYPE'] = this._createGameTypeUI();
+        this._screenContainers['AI_DIFFICULTY'] = this._createAIDifficultyUI();
         this._screenContainers['WAIT_FOR_RANDOM'] = this._createWaitForRandomUI();
         this._screenContainers['WAIT_FOR_RESPONSE'] = this._createWaitForResponseUI();
         this._screenContainers['PLAYING_PHYSICS'] = this._createPlayingPhysicsUI();
         this._screenContainers['PLAYING_STRICT'] = this._createPlayingStrictUI();
+        this._screenContainers['PLAYING_AI'] = this._createPlayingAIUI();
         this._screenContainers['DRAW_OFFERED'] = this._createDrawOfferedUI();
         this._screenContainers['GAME_OVER'] = this._createGameOverUI();
         this._screenContainers['HOST_OR_JOIN'] = this._createHostOrJoinUI();
@@ -159,9 +163,15 @@ export default class ChessGameUI {
             'width': 0.5,
         });
         let randomMatchButton = ThreeMeshUIHelper.createButtonBlock({
-            'text': 'Play',
+            'text': 'Play Random User',
             'ontrigger': () => {
                 this.setScreen('GAME_TYPE');
+            },
+        });
+        let aiMatchButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': 'Play Computer',
+            'ontrigger': () => {
+                this.setScreen('AI_DIFFICULTY');
             },
         });
         //let roomButton = ThreeMeshUIHelper.createButtonBlock({
@@ -181,6 +191,7 @@ export default class ChessGameUI {
         }
         container.add(textBlock);
         container.add(randomMatchButton);
+        container.add(aiMatchButton);
         //container.add(roomButton);
         if(global.deviceType == 'XR') {
             container.add(settingsButton);
@@ -189,6 +200,7 @@ export default class ChessGameUI {
         container.set({ fontFamily: this._fontFamily, fontTexture: this._fontTexture });
         this._interactables['MAIN'].push(container);
         this._interactables['MAIN'].push(randomMatchButton);
+        this._interactables['MAIN'].push(aiMatchButton);
         //this._interactables['MAIN'].push(roomButton);
         return container;
     }
@@ -240,6 +252,72 @@ export default class ChessGameUI {
         this._interactables['GAME_TYPE'].push(physicsMatchButton);
         this._interactables['GAME_TYPE'].push(strictMatchButton);
         this._interactables['GAME_TYPE'].push(backButton);
+        return container;
+    }
+
+    _createAIDifficultyUI() {
+        let container = new ThreeMeshUI.Block({
+            height: 1,
+            width: 1.5,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
+        });
+        let titleBlock = ThreeMeshUIHelper.createTextBlock({
+            'text': 'Chess XR',
+            'fontSize': 0.08,
+            'height': 0.2,
+            'width': 0.5,
+        });
+        let rowBlock = new ThreeMeshUI.Block({
+            'height': 0.15,
+            'width': 0.7,
+            'contentDirection': 'row',
+            'justifyContent': 'center',
+            'backgroundOpacity': 0,
+            'margin': 0.02,
+        });
+        let easyButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': 'Easy',
+            'width': 0.3,
+            'ontrigger': () => {
+                global.chessXR.playAI('EASY');
+                global.chessXR.toggleStrict(true);
+            },
+        });
+        let mediumButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': 'Medium',
+            'width': 0.3,
+            'ontrigger': () => {
+                global.chessXR.playAI('MEDIUM');
+                global.chessXR.toggleStrict(true);
+            },
+        });
+        let hardButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': 'Hard',
+            'width': 0.3,
+            'ontrigger': () => {
+                global.chessXR.playAI('HARD');
+                global.chessXR.toggleStrict(true);
+            },
+        });
+        let backButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': 'Back',
+            'ontrigger': () => {
+                this.setScreen(this._lastScreen);
+            },
+        });
+        rowBlock.add(easyButton);
+        rowBlock.add(mediumButton);
+        rowBlock.add(hardButton);
+        container.add(titleBlock);
+        container.add(rowBlock);
+        container.add(backButton);
+        container.set({ fontFamily: this._fontFamily, fontTexture: this._fontTexture });
+        this._interactables['AI_DIFFICULTY'].push(container);
+        this._interactables['AI_DIFFICULTY'].push(easyButton);
+        this._interactables['AI_DIFFICULTY'].push(mediumButton);
+        this._interactables['AI_DIFFICULTY'].push(hardButton);
+        this._interactables['AI_DIFFICULTY'].push(backButton);
         return container;
     }
 
@@ -395,6 +473,48 @@ export default class ChessGameUI {
         return container;
     }
 
+    _createPlayingAIUI() {
+        let container = new ThreeMeshUI.Block({
+            height: 1,
+            width: 1.5,
+            backgroundColor: this._backgroundColor,
+            backgroundOpacity: this._backgroundOpacity,
+        });
+        let titleBlock = ThreeMeshUIHelper.createTextBlock({
+            'text': 'Chess XR',
+            'fontSize': 0.08,
+            'height': 0.2,
+            'width': 0.5,
+        });
+        let opponentNameBlock = ThreeMeshUIHelper.createTextBlock({
+            'text': 'You are playing the Computer',
+            'height': 0.15,
+            'width': 1.2,
+        });
+        let settingsButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': 'Settings',
+            'ontrigger': () => {
+                this.setScreen('SETTINGS');
+            },
+        });
+        let quitButton = ThreeMeshUIHelper.createButtonBlock({
+            'text': 'Quit',
+            'ontrigger': () => {
+                this.setScreen('MAIN');
+                global.chessXR.quitGame();
+            },
+        });
+        container.add(titleBlock);
+        container.add(opponentNameBlock);
+        container.add(settingsButton);
+        container.add(quitButton);
+        container.set({ fontFamily: this._fontFamily, fontTexture: this._fontTexture });
+        this._interactables['PLAYING_AI'].push(container);
+        this._interactables['PLAYING_AI'].push(settingsButton);
+        this._interactables['PLAYING_AI'].push(quitButton);
+        return container;
+    }
+
     _createDrawOfferedUI() {
         let container = new ThreeMeshUI.Block({
             height: 1,
@@ -459,9 +579,12 @@ export default class ChessGameUI {
         let playAgainButton = ThreeMeshUIHelper.createButtonBlock({
             'text': 'Play Again',
             'ontrigger': () => {
-                this.setScreen('WAIT_FOR_RESPONSE');
-                //TODO: call function in chessXR to signify we want to play again
-                global.chessXR.requestToPlayAgain();
+                if(global.chessXR.isPlayingAI) {
+                    global.chessXR.startAIGame();
+                } else {
+                    this.setScreen('WAIT_FOR_RESPONSE');
+                    global.chessXR.requestToPlayAgain();
+                }
             },
         });
         let quitButton = ThreeMeshUIHelper.createButtonBlock({
@@ -877,9 +1000,11 @@ export default class ChessGameUI {
     strictGameOver(type, isWin) {
         let textComponent = this._gameOverDescription.children[1];
         if(type == 'CHECKMATE') {
-            let opponentName = (global.chessXR.opponentName)
-                ? global.chessXR.opponentName
-                : "...";
+            let opponentName = (global.chessXR.isPlayingAI)
+                ? "Computer"
+                : (global.chessXR.opponentName)
+                    ? global.chessXR.opponentName
+                    : "...";
             if(isWin) {
                 textComponent.set({content: 'You checkmated ' + opponentName});
             } else {
